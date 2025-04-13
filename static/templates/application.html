@@ -64,7 +64,7 @@
                         {% for question in application.questions %}
                         <div class="card mb-3 border-light">
                             <div class="card-header bg-secondary">
-                                <p>{{ loop.index }}. {{ question.question }}</p>
+                                <p class="mb-0">{{ loop.index }}. {{ question.question }}</p>
                             </div>
                             <div style="border-bottom-right-radius: 0.5rem;border-bottom-left-radius: 0.5rem;background-color: var(--border);" class="card-body">
                                 <p class="mb-0">{{ question.answer }}</p>
