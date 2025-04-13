@@ -1,3 +1,4 @@
 storage
 __pycache__
-.env.*
+.env
+.env.example
