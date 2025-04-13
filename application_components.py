@@ -27,7 +27,6 @@ ACTIVE_APPS_FILE = os.path.join(APPS_DIRECTORY, 'active_applications.json')
 
 # Function to load active applications from file
 def load_active_applications():
-    """Load active applications from JSON file"""
     if not os.path.exists(ACTIVE_APPS_FILE):
         return {}
     
@@ -40,7 +39,6 @@ def load_active_applications():
 
 # Function to save active applications to file
 def save_active_applications(applications):
-    """Save active applications to JSON file"""
     try:
         # Ensure the directory exists
         if not os.path.exists(APPS_DIRECTORY):
@@ -394,7 +392,6 @@ class StaffApplicationSelect(Select):
                     pass
                     
     async def refresh_select_menu(self, interaction: discord.Interaction):
-        """Refreshes the select menu by updating the original message with a new view."""
         try:
             # Create a new view with the same options
             panels = load_panels()

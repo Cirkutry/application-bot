@@ -28,7 +28,6 @@ pathlib.Path(PANELS_DIRECTORY).mkdir(exist_ok=True)
 PANELS_FILE = os.path.join(PANELS_DIRECTORY, 'panels.json')
 
 def load_panels():
-    """Load saved panels from JSON file"""
     if not os.path.exists(PANELS_FILE):
         return {}
     
@@ -40,7 +39,6 @@ def load_panels():
         return {}
 
 def save_panels(panels):
-    """Save panels to JSON file"""
     try:
         with open(PANELS_FILE, 'w') as f:
             json.dump(panels, f, indent=4)
@@ -50,7 +48,6 @@ def save_panels(panels):
         return False
 
 async def register_panels(bot):
-    """Register all panels with the bot"""
     panels = load_panels()
     
     # Clear existing views to prevent duplicates
@@ -102,7 +99,6 @@ async def register_panels(bot):
     return registered_count
 
 async def create_panel(bot, channel_id, positions, embed_data):
-    """Create a new application panel"""
     try:
         # Create the embed
         embed = discord.Embed(

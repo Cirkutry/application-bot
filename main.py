@@ -15,7 +15,6 @@ import pathlib
 logger = logging.getLogger(__name__)
 
 def ensure_directories():
-    """Create all required directories if they don't exist."""
     directories = [
         'storage',
         'storage/panels',
@@ -87,7 +86,6 @@ web_site = None
 shutdown_event = asyncio.Event()
 
 async def shutdown():
-    """Gracefully shutdown the bot and web server."""
     logging.info("Starting shutdown...")
     
     # Set shutdown event
@@ -106,13 +104,11 @@ async def shutdown():
     logging.info("Shutdown complete")
 
 def signal_handler(signum, frame):
-    """Handle shutdown signals."""
     logging.info(f"Received signal {signum}, initiating shutdown...")
     # Don't create a new task, just set the shutdown event
     shutdown_event.set()
 
 async def handle_exception(loop, context):
-    """Handle exceptions during runtime."""
     exception = context.get('exception')
     if exception:
         logging.error(f"Caught exception: {exception}")

@@ -19,7 +19,6 @@ pathlib.Path(PANELS_DIRECTORY).mkdir(exist_ok=True)
 PANELS_FILE = os.path.join(PANELS_DIRECTORY, 'panels.json')
 
 def load_panels():
-    """Load saved panels from JSON file"""
     if not os.path.exists(PANELS_FILE):
         return {}
     
@@ -31,7 +30,6 @@ def load_panels():
         return {}
 
 def save_panels(panels):
-    """Save panels to JSON file"""
     try:
         with open(PANELS_FILE, 'w') as f:
             json.dump(panels, f, indent=4)

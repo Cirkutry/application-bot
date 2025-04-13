@@ -15,7 +15,6 @@ pathlib.Path('storage').mkdir(exist_ok=True)
 QUESTIONS_FILE = 'storage/questions.json'
 
 def load_questions():
-    """Load questions from JSON file."""
     if not os.path.exists(QUESTIONS_FILE):
         return {}
     
@@ -44,7 +43,6 @@ def load_questions():
         return data
 
 def save_questions(questions):
-    """Save questions to JSON file."""
     try:
         # Ensure directory exists
         os.makedirs(os.path.dirname(QUESTIONS_FILE), exist_ok=True)
@@ -57,7 +55,6 @@ def save_questions(questions):
         return False
 
 def get_questions(position):
-    """Get questions for a specific position."""
     try:
         questions = load_questions()
         if position in questions:
@@ -84,7 +81,6 @@ def get_questions(position):
         return []
 
 def add_position(position, copy_from=None):
-    """Add a new position."""
     questions = load_questions()
     if position in questions:
         return False  # Position already exists
@@ -117,7 +113,6 @@ def add_position(position, copy_from=None):
     return save_questions(questions)
 
 def delete_position(position):
-    """Delete a position and its questions."""
     questions = load_questions()
     if position in questions:
         del questions[position]
@@ -125,7 +120,6 @@ def delete_position(position):
     return False
 
 def update_position_settings(position, settings):
-    """Update position settings."""
     questions = load_questions()
     if position in questions:
         questions[position].update(settings)
@@ -133,7 +127,6 @@ def update_position_settings(position, settings):
     return False
 
 def add_question_to_position(position, question):
-    """Add a question to a position."""
     questions = load_questions()
     if position in questions:
         questions[position]['questions'].append(question)
@@ -141,7 +134,6 @@ def add_question_to_position(position, question):
     return False
 
 def remove_question(position, index):
-    """Remove a question from a position."""
     questions = load_questions()
     if position in questions and 0 <= index < len(questions[position]['questions']):
         questions[position]['questions'].pop(index)
@@ -149,7 +141,6 @@ def remove_question(position, index):
     return False
 
 def update_question(position, index, new_question):
-    """Update a question in a position."""
     questions = load_questions()
     if position in questions and 0 <= index < len(questions[position]['questions']):
         questions[position]['questions'][index] = new_question
@@ -157,7 +148,6 @@ def update_question(position, index, new_question):
     return False
 
 def reorder_questions(position, new_order):
-    """Reorder questions in a position."""
     questions = load_questions()
     if position in questions and len(new_order) == len(questions[position]['questions']):
         questions[position]['questions'] = [questions[position]['questions'][i] for i in new_order]

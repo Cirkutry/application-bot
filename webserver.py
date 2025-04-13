@@ -79,7 +79,6 @@ class SimpleAccessFormatter(logging.Formatter):
 access_log_format = SimpleAccessFormatter()
 
 def auth_required(handler):
-    """Decorator to require authentication for routes."""
     async def wrapper(request):
         # Check session
         session_id = request.cookies.get('session_id')
@@ -155,14 +154,12 @@ async def auth_middleware(request, handler):
     return await handler(request)
 
 async def get_session(request):
-    """Get session data from request."""
     session_id = request.cookies.get('session_id')
     if not session_id or session_id not in sessions:
         raise web.HTTPUnauthorized(text='Invalid session')
     return sessions[session_id]
 
 async def get_user_info(user_id):
-    """Get user information from Discord."""
     server = bot.get_guild(int(SERVER_ID))
     if not server:
         return None
@@ -180,7 +177,6 @@ async def get_user_info(user_id):
     }
 
 async def load_viewer_roles():
-    """Load viewer roles from JSON file."""
     try:
         with open('storage/viewer_roles.json', 'r') as f:
             return json.load(f)
@@ -188,7 +184,6 @@ async def load_viewer_roles():
         return []
 
 async def get_application_stats():
-    """Get application statistics."""
     try:
         applications = []
         for filename in os.listdir(APPS_DIRECTORY):
@@ -216,7 +211,6 @@ async def get_application_stats():
         }
 
 async def load_applications():
-    """Load all applications."""
     applications = []
     for filename in os.listdir(APPS_DIRECTORY):
         # Skip active_applications.json file
@@ -256,7 +250,6 @@ async def auth_login(request):
 
 @routes.get('/auth/callback')
 async def auth_callback(request):
-    """Handle OAuth callback and create session."""
     # Get the authorization code from the callback
     code = request.query.get('code')
     if not code:
@@ -341,7 +334,6 @@ async def auth_logout(request):
     return response
 
 async def get_server_info():
-    """Get Discord server information."""
     server = bot.get_guild(int(SERVER_ID))
     if server:
         return {
@@ -354,7 +346,6 @@ async def get_server_info():
 @routes.get('/')
 @auth_required
 async def index(request):
-    """Render dashboard page."""
     session = await get_session(request)
     user_id = session['user_id']
     
@@ -398,7 +389,6 @@ async def index(request):
 @routes.get('/applications')
 @auth_required
 async def applications(request):
-    """Handle applications list view."""
     # Get the user from the request
     user = request['user']
     user_permissions = request['user_permissions']
@@ -519,7 +509,6 @@ async def applications(request):
 @routes.get('/positions')
 @auth_required
 async def questions(request):
-    """Render the questions manager page."""
     # Get user information from session
     user = request['user']
     
@@ -553,7 +542,6 @@ async def questions(request):
 @routes.get('/application/{id}')
 @auth_required
 async def application(request):
-    """Handle individual application view."""
     # Get the user from the request
     user = request['user']
     user_permissions = request['user_permissions']
@@ -658,7 +646,6 @@ async def delete_application(request):
 
 @routes.post('/api/questions/position/add')
 async def add_position(request):
-    """Add a new position."""
     try:
         data = await request.json()
         position_name = data.get('name')
@@ -701,7 +688,6 @@ async def add_position(request):
 
 @routes.post('/api/questions/position/delete')
 async def delete_position(request):
-    """Delete a position."""
     try:
         data = await request.json()
         position = data.get('position')
@@ -724,7 +710,6 @@ async def delete_position(request):
 
 @routes.post('/api/questions/add')
 async def add_question(request):
-    """Add a question to a position."""
     try:
         data = await request.json()
         position = data.get('position')
@@ -748,7 +733,6 @@ async def add_question(request):
 
 @routes.post('/api/questions/remove')
 async def remove_question(request):
-    """Remove a question from a position."""
     try:
         data = await request.json()
         position = data.get('position')
@@ -772,7 +756,6 @@ async def remove_question(request):
 
 @routes.post('/api/questions/update')
 async def update_question(request):
-    """Update a question in a position."""
     try:
         data = await request.json()
         position = data.get('position')
@@ -798,7 +781,6 @@ async def update_question(request):
 @routes.get('/panel-creator')
 @auth_required
 async def panel_creator(request):
-    """Render the panel creator page."""
     session = await get_session(request)
     user_id = session['user_id']
     
@@ -824,7 +806,6 @@ async def panel_creator(request):
 
 @routes.post('/api/panels/create')
 async def create_panel(request):
-    """Create an application panel in a specified channel"""
     try:
         data = await request.json()
         
@@ -912,7 +893,6 @@ async def create_panel(request):
 @routes.post('/api/applications/{app_id}/status')
 @auth_required
 async def update_application_status(request):
-    """Update application status through API."""
     # Check if user is admin
     if not request['user_permissions']['is_admin']:
         return web.json_response({'success': False, 'error': 'Admin privileges required'}, status=403)
@@ -953,7 +933,6 @@ async def update_application_status(request):
 @routes.get('/api/viewer-roles')
 @auth_required
 async def get_viewer_roles(request):
-    """Get viewer roles."""
     # Check if user is admin
     if not request['user_permissions']['is_admin']:
         return web.json_response({'success': False, 'error': 'Admin privileges required'}, status=403)
@@ -985,7 +964,6 @@ async def get_viewer_roles(request):
 @routes.post('/api/viewer-roles/update')
 @auth_required
 async def update_viewer_roles(request):
-    """Update viewer roles."""
     # Check if user is admin
     if not request['user_permissions']['is_admin']:
         return web.json_response({'success': False, 'error': 'Admin privileges required'}, status=403)
@@ -1015,7 +993,6 @@ async def update_viewer_roles(request):
 @routes.post('/api/questions/position/update')
 @auth_required
 async def update_position(request):
-    """Update a position's settings."""
     try:
         data = await request.json()
         position_name = data.get('name')
@@ -1090,7 +1067,6 @@ async def edit_position(request):
 
 # Create and run the app
 async def start_web_server(bot_instance):
-    """Start the web server."""
     global bot
     bot = bot_instance
     

@@ -145,7 +145,6 @@ class ApplicationBot(discord.Client):
         await self.process_commands(message)
     
     async def _complete_application(self, message, app_data):
-        """Helper method to complete and submit an application"""
         logger.info("All questions answered, preparing submission")
         
         # Format questions and answers
