@@ -7,7 +7,6 @@ import json
 import secrets
 import urllib.parse
 import datetime
-from html_generator import generate_html_application
 import discord
 from discord.utils import get
 import aiohttp_jinja2
@@ -647,18 +646,12 @@ async def delete_application(request):
     
     # Check if app exists
     json_path = os.path.join(APPS_DIRECTORY, f"{app_id}.json")
-    html_path = os.path.join(APPS_DIRECTORY, f"{app_id}.html")
     
     if not os.path.exists(json_path):
         return web.json_response({'error': 'Application not found'}, status=404)
     
     try:
-        # Delete both JSON and HTML files
-        if os.path.exists(json_path):
-            os.remove(json_path)
-        if os.path.exists(html_path):
-            os.remove(html_path)
-        
+        os.remove(json_path)
         return web.json_response({'message': 'Application deleted successfully'})
     except Exception as e:
         return web.json_response({'error': str(e)}, status=500)

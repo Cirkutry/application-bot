@@ -1,4 +1,3 @@
-Creating new file...
 import os
 import discord
 from discord import app_commands
@@ -7,7 +6,6 @@ import asyncio
 import json
 import pathlib
 import datetime
-from html_generator import generate_html_application
 from question_manager import get_questions, load_questions
 import uuid
 from discord.ext import commands
@@ -172,9 +170,6 @@ class ApplicationBot(discord.Client):
         json_path = os.path.join(APPS_DIRECTORY, f"{app_id}.json")
         with open(json_path, 'w') as f:
             json.dump(final_app_data, f, indent=4)
-        
-        # Generate HTML
-        generate_html_application(final_app_data, app_id, APPS_DIRECTORY)
         
         # Send confirmation
         await message.channel.send("Thank you! Your application has been submitted for review. 🎉")
