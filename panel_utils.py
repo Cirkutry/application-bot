@@ -1,7 +1,11 @@
 import os
 import json
 import pathlib
+import logging
 from dotenv import load_dotenv
+
+# Get logger
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()

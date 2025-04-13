@@ -2,6 +2,10 @@ import os
 import json
 import pathlib
 from dotenv import load_dotenv
+import logging
+
+# Get logger
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -49,7 +53,7 @@ def save_questions(questions):
             json.dump(questions, f, indent=4)
         return True
     except Exception as e:
-        print(f"Error saving questions: {str(e)}")
+        logger.error(f"Error saving questions: {str(e)}")
         return False
 
 def get_questions(position):
@@ -58,26 +62,25 @@ def get_questions(position):
         questions = load_questions()
         if position in questions:
             if not questions[position]['enabled']:
-                print(f"Position {position} is disabled")
+                logger.info(f"Position {position} is disabled")
                 return []
                 
             if 'questions' not in questions[position]:
-                print(f"No 'questions' field found for position {position}")
+                logger.info(f"No 'questions' field found for position {position}")
                 return []
                 
             if not questions[position]['questions']:
-                print(f"Empty questions list for position {position}")
+                logger.info(f"Empty questions list for position {position}")
                 return []
                 
-            print(f"Successfully loaded {len(questions[position]['questions'])} questions for position {position}")
             return questions[position]['questions']
         else:
-            print(f"Position {position} not found in questions data")
+            logger.info(f"Position {position} not found in questions data")
             return []
     except Exception as e:
-        print(f"Error getting questions for position {position}: {e}")
+        logger.error(f"Error getting questions for position {position}: {e}")
         import traceback
-        print(traceback.format_exc())
+        logger.error(traceback.format_exc())
         return []
 
 def add_position(position, copy_from=None):

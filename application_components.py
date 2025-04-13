@@ -8,7 +8,11 @@ from dotenv import load_dotenv
 import uuid
 import traceback
 import pathlib
+import logging
 from panel_utils import load_panels
+
+# Get logger
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -31,7 +35,7 @@ def load_active_applications():
         with open(ACTIVE_APPS_FILE, 'r') as f:
             return json.load(f)
     except Exception as e:
-        print(f"Error loading active applications: {str(e)}")
+        logger.error(f"Error loading active applications: {str(e)}")
         return {}
 
 # Function to save active applications to file
@@ -45,7 +49,7 @@ def save_active_applications(applications):
             json.dump(applications, f, indent=4)
         return True
     except Exception as e:
-        print(f"Error saving active applications: {str(e)}")
+        logger.error(f"Error saving active applications: {str(e)}")
         return False
 
 # Remove the @bot.event decorator and create a function instead
@@ -172,7 +176,7 @@ async def handle_dm_message(bot, message):
                             thread_name = f"{message.author.name}'s {application['position']} Application"
                             await log_message.create_thread(name=thread_name, auto_archive_duration=1440)
                         except Exception as e:
-                            print(f"Error creating thread: {e}")
+                            logger.error(f"Error creating thread: {e}")
                     
                     # Ping roles if specified
                     ping_roles = position_settings.get('ping_roles', [])
@@ -180,7 +184,7 @@ async def handle_dm_message(bot, message):
                         ping_mentions = ' '.join([f"<@&{role_id}>" for role_id in ping_roles])
                         await log_channel.send(ping_mentions)
             except Exception as e:
-                print(f"Error logging application: {e}")
+                logger.error(f"Error logging application: {e}")
 
 class StaffApplicationSelect(Select):
     def __init__(self, bot, options, panel_id=None):
@@ -235,7 +239,7 @@ class StaffApplicationSelect(Select):
                             await self.refresh_select_menu(interaction)
                             return
                         except Exception as e:
-                            print(f"Error sending DM: {e}")
+                            logger.error(f"Error sending DM: {e}")
                             await interaction.followup.send("Failed to send you a DM. Please make sure your DMs are open and try again.", ephemeral=True)
                             # Refresh the select menu for other users
                             await self.refresh_select_menu(interaction)
@@ -261,7 +265,7 @@ class StaffApplicationSelect(Select):
             questions = get_questions(position)
             
             if not questions or len(questions) == 0:
-                print(f"ERROR: No questions loaded for position {position}")
+                logger.error(f"No questions loaded for position {position}")
                 await interaction.response.send_message(
                     "This position has no questions set up. Please contact an administrator.",
                     ephemeral=True
@@ -275,7 +279,7 @@ class StaffApplicationSelect(Select):
             position_settings = questions_data.get(position, {})
             log_channel_id = position_settings.get('log_channel')
             if not log_channel_id:
-                print(f"ERROR: No log channel set for position {position}")
+                logger.error(f"No log channel set for position {position}")
                 await interaction.response.send_message(
                     "This position has no log channel set up. Please contact an administrator.",
                     ephemeral=True
@@ -324,7 +328,7 @@ class StaffApplicationSelect(Select):
                 
                 # Make sure questions are loaded properly
                 if not application_data['questions'] or len(application_data['questions']) == 0:
-                    print(f"ERROR: No questions found for position {position}")
+                    logger.error(f"No questions found for position {position}")
                     await dm.send("ERROR: No questions were found for this position. Please contact an administrator.")
                     await interaction.followup.send("Error: No questions found for this position. Please contact an administrator.", ephemeral=True)
                     
@@ -335,13 +339,7 @@ class StaffApplicationSelect(Select):
                     # Refresh the select menu for other users
                     await self.refresh_select_menu(interaction)
                     return
-                    
-                # Debug log the questions
-                print(f"Questions for position {position}: {application_data['questions']}")
-                print(f"First question: {application_data['questions'][0]}")
-                
-                # Don't send the first question here anymore - the button will handle that
-                
+
                 # Set success flag
                 dm_success = True
                 
@@ -351,9 +349,9 @@ class StaffApplicationSelect(Select):
                 # Refresh the select menu for other users
                 await self.refresh_select_menu(interaction)
             except Exception as e:
-                print(f"Error sending DM questions: {e}")
-                print(f"Application data: {application_data}")
-                print(f"Traceback: {traceback.format_exc()}")
+                logger.error(f"Error sending DM questions: {e}")
+                logger.error(f"Application data: {application_data}")
+                logger.error(f"Traceback: {traceback.format_exc()}")
                 
                 # Try to send at least a notification about the error to the user's DM if we got that far
                 try:
@@ -375,8 +373,8 @@ class StaffApplicationSelect(Select):
                 await self.refresh_select_menu(interaction)
                 return
         except Exception as e:
-            print(f"Error in StaffApplicationSelect callback: {e}")
-            print(f"Error traceback: {traceback.format_exc()}")
+            logger.error(f"Error in StaffApplicationSelect callback: {e}")
+            logger.error(f"Error traceback: {traceback.format_exc()}")
             try:
                 await interaction.response.send_message(
                     "An error occurred while processing your selection. Please try again later.",
@@ -407,8 +405,8 @@ class StaffApplicationSelect(Select):
                 # Update the original message with the new view
                 await interaction.message.edit(view=new_view)
         except Exception as e:
-            print(f"Error refreshing select menu: {e}")
-            print(f"Error traceback: {traceback.format_exc()}")
+            logger.error(f"Error refreshing select menu: {e}")
+            logger.error(f"Error traceback: {traceback.format_exc()}")
 
 class StaffApplicationView(View):
     def __init__(self, bot, options=None, panel_id=None):
@@ -441,11 +439,11 @@ class StaffApplicationView(View):
         try:
             return True
         except Exception as e:
-            print(f"Error in interaction check: {e}")
+            logger.error(f"Error in interaction check: {e}")
             return False
 
     async def on_error(self, error: Exception, item: Item, interaction: discord.Interaction) -> None:
-        print(f"Error processing interaction: {error}")
+        logger.error(f"Error processing interaction: {error}")
         await interaction.response.send_message("An error occurred while processing your request. Please try again later.", ephemeral=True)
 
 class ReasonModal(Modal):
@@ -513,15 +511,11 @@ class ReasonModal(Modal):
                 guild_member = interaction.guild.get_member(int(application['user_id']))
                 if guild_member:
                     if self.action == 'accept':
-                        # Debug log the role IDs
-                        print(f"Accepting application - Position settings: {position_settings}")
-                        print(f"Accepted roles to add: {position_settings.get('accepted_roles', [])}")
-                        print(f"Denied roles to remove: {position_settings.get('denied_roles', [])}")
                         
                         # Check bot's permissions
                         bot_member = interaction.guild.get_member(interaction.client.user.id)
                         if not bot_member.guild_permissions.manage_roles:
-                            print("Bot does not have permission to manage roles!")
+                            logger.error("Bot does not have permission to manage roles!")
                             await interaction.followup.send("Bot does not have permission to manage roles. Please check bot permissions.", ephemeral=True)
                             return
                         
@@ -532,11 +526,11 @@ class ReasonModal(Modal):
                             if role:
                                 # Check if bot can manage this role
                                 if role.position >= bot_member.top_role.position:
-                                    print(f"Bot cannot manage role {role.name} (position too high)")
+                                    logger.error(f"Bot cannot manage role {role.name} (position too high)")
                                     await interaction.followup.send(f"Bot cannot manage role {role.name} (position too high). Please adjust role hierarchy.", ephemeral=True)
                                     return
                                 roles_to_add.append(role)
-                                print(f"Found role to add: {role.name} (ID: {role.id})")
+                                logger.info(f"Found role to add: {role.name} (ID: {role.id})")
                         
                         # Remove denied roles
                         roles_to_remove = []
@@ -545,33 +539,29 @@ class ReasonModal(Modal):
                             if role:
                                 # Check if bot can manage this role
                                 if role.position >= bot_member.top_role.position:
-                                    print(f"Bot cannot manage role {role.name} (position too high)")
+                                    logger.error(f"Bot cannot manage role {role.name} (position too high)")
                                     await interaction.followup.send(f"Bot cannot manage role {role.name} (position too high). Please adjust role hierarchy.", ephemeral=True)
                                     return
                                 roles_to_remove.append(role)
-                                print(f"Found role to remove: {role.name} (ID: {role.id})")
+                                logger.info(f"Found role to remove: {role.name} (ID: {role.id})")
                         
                         # Apply role changes
                         try:
                             if roles_to_add:
                                 await guild_member.add_roles(*roles_to_add)
-                                print(f"Added roles: {[r.name for r in roles_to_add]}")
+                                logger.info(f"Added roles: {[r.name for r in roles_to_add]}")
                             if roles_to_remove:
                                 await guild_member.remove_roles(*roles_to_remove)
-                                print(f"Removed roles: {[r.name for r in roles_to_remove]}")
+                                logger.info(f"Removed roles: {[r.name for r in roles_to_remove]}")
                         except discord.Forbidden as e:
-                            print(f"Permission error while managing roles: {e}")
+                            logger.error(f"Permission error while managing roles: {e}")
                             await interaction.followup.send(f"Permission error while managing roles: {e}", ephemeral=True)
                             return
                         except Exception as e:
-                            print(f"Error while managing roles: {e}")
+                            logger.error(f"Error while managing roles: {e}")
                             await interaction.followup.send(f"Error while managing roles: {e}", ephemeral=True)
                             return
                     else:
-                        # Debug log the role IDs
-                        print(f"Rejecting application - Position settings: {position_settings}")
-                        print(f"Denied roles to add: {position_settings.get('denied_roles', [])}")
-                        print(f"Accepted roles to remove: {position_settings.get('accepted_roles', [])}")
                         
                         # Assign denied roles
                         roles_to_add = []
@@ -579,7 +569,7 @@ class ReasonModal(Modal):
                             role = interaction.guild.get_role(int(role_id))
                             if role:
                                 roles_to_add.append(role)
-                                print(f"Found role to add: {role.name} (ID: {role.id})")
+                                logger.info(f"Found role to add: {role.name} (ID: {role.id})")
                         
                         # Remove accepted roles
                         roles_to_remove = []
@@ -587,23 +577,26 @@ class ReasonModal(Modal):
                             role = interaction.guild.get_role(int(role_id))
                             if role:
                                 roles_to_remove.append(role)
-                                print(f"Found role to remove: {role.name} (ID: {role.id})")
+                                logger.info(f"Found role to remove: {role.name} (ID: {role.id})")
                         
                         # Apply role changes
                         if roles_to_add:
                             await guild_member.add_roles(*roles_to_add)
-                            print(f"Added roles: {[r.name for r in roles_to_add]}")
+                            logger.info(f"Added roles: {[r.name for r in roles_to_add]}")
                         if roles_to_remove:
                             await guild_member.remove_roles(*roles_to_remove)
-                            print(f"Removed roles: {[r.name for r in roles_to_remove]}")
+                            logger.info(f"Removed roles: {[r.name for r in roles_to_remove]}")
                 else:
-                    print(f"Could not find guild member for user ID: {application['user_id']}")
+                    logger.warning(f"Could not find guild member for user ID: {application['user_id']}")
         except discord.Forbidden:
             dm_error = "The bot does not have permission to send DMs to this user."
+            logger.error(f"Permission error when sending DM to user ID {application['user_id']}: {dm_error}")
         except discord.HTTPException as e:
             dm_error = f"Failed to send DM: {str(e)}"
+            logger.error(f"HTTP error when sending DM to user ID {application['user_id']}: {dm_error}")
         except Exception as e:
             dm_error = f"Unexpected error while sending DM: {str(e)}"
+            logger.error(f"Unexpected error when sending DM to user ID {application['user_id']}: {dm_error}")
         
         # Update application status and add processed by info
         application['status'] = 'approved' if self.action == 'accept' else 'rejected'
@@ -646,7 +639,7 @@ class ReasonModal(Modal):
             # Update the message with new embed and remove buttons
             await message.edit(embed=embed, view=None)
         except Exception as e:
-            print(f"Error updating embed: {e}")
+            logger.error(f"Error updating embed: {e}")
         
         # Send followup message
         if dm_sent:
@@ -724,10 +717,6 @@ class ApplicationResponseButton(Button):
                     guild_member = interaction.guild.get_member(int(application['user_id']))
                     if guild_member:
                         if self.action == 'accept':
-                            # Debug log the role IDs
-                            print(f"Accepting application - Position settings: {position_settings}")
-                            print(f"Accepted roles to add: {position_settings.get('accepted_roles', [])}")
-                            print(f"Denied roles to remove: {position_settings.get('denied_roles', [])}")
                             
                             # Assign accepted roles
                             roles_to_add = []
@@ -735,7 +724,7 @@ class ApplicationResponseButton(Button):
                                 role = interaction.guild.get_role(int(role_id))
                                 if role:
                                     roles_to_add.append(role)
-                                    print(f"Found role to add: {role.name} (ID: {role.id})")
+                                    logger.info(f"Found role to add: {role.name} (ID: {role.id})")
                             
                             # Remove denied roles
                             roles_to_remove = []
@@ -743,20 +732,16 @@ class ApplicationResponseButton(Button):
                                 role = interaction.guild.get_role(int(role_id))
                                 if role:
                                     roles_to_remove.append(role)
-                                    print(f"Found role to remove: {role.name} (ID: {role.id})")
+                                    logger.info(f"Found role to remove: {role.name} (ID: {role.id})")
                             
                             # Apply role changes
                             if roles_to_add:
                                 await guild_member.add_roles(*roles_to_add)
-                                print(f"Added roles: {[r.name for r in roles_to_add]}")
+                                logger.info(f"Added roles: {[r.name for r in roles_to_add]}")
                             if roles_to_remove:
                                 await guild_member.remove_roles(*roles_to_remove)
-                                print(f"Removed roles: {[r.name for r in roles_to_remove]}")
+                                logger.info(f"Removed roles: {[r.name for r in roles_to_remove]}")
                         else:
-                            # Debug log the role IDs
-                            print(f"Rejecting application - Position settings: {position_settings}")
-                            print(f"Denied roles to add: {position_settings.get('denied_roles', [])}")
-                            print(f"Accepted roles to remove: {position_settings.get('accepted_roles', [])}")
                             
                             # Assign denied roles
                             roles_to_add = []
@@ -764,7 +749,7 @@ class ApplicationResponseButton(Button):
                                 role = interaction.guild.get_role(int(role_id))
                                 if role:
                                     roles_to_add.append(role)
-                                    print(f"Found role to add: {role.name} (ID: {role_id})")
+                                    logger.info(f"Found role to add: {role.name} (ID: {role_id})")
                             
                             # Remove accepted roles
                             roles_to_remove = []
@@ -772,17 +757,17 @@ class ApplicationResponseButton(Button):
                                 role = interaction.guild.get_role(int(role_id))
                                 if role:
                                     roles_to_remove.append(role)
-                                    print(f"Found role to remove: {role.name} (ID: {role_id})")
+                                    logger.info(f"Found role to remove: {role.name} (ID: {role_id})")
                             
                             # Apply role changes
                             if roles_to_add:
                                 await guild_member.add_roles(*roles_to_add)
-                                print(f"Added roles: {[r.name for r in roles_to_add]}")
+                                logger.info(f"Added roles: {[r.name for r in roles_to_add]}")
                             if roles_to_remove:
                                 await guild_member.remove_roles(*roles_to_remove)
-                                print(f"Removed roles: {[r.name for r in roles_to_remove]}")
+                                logger.info(f"Removed roles: {[r.name for r in roles_to_remove]}")
                     else:
-                        print(f"Could not find guild member for user ID: {application['user_id']}")
+                        logger.error(f"Could not find guild member for user ID: {application['user_id']}")
             except discord.Forbidden:
                 dm_error = "The bot does not have permission to send DMs to this user."
             except discord.HTTPException as e:
@@ -825,7 +810,7 @@ class ApplicationResponseButton(Button):
                 # Update the message with new embed and remove buttons
                 await message.edit(embed=embed, view=None)
             except Exception as e:
-                print(f"Error updating embed: {e}")
+                logger.error(f"Error updating embed: {e}")
             
             # Send followup message
             if dm_sent:
@@ -877,7 +862,7 @@ class ApplicationResponseView(View):
         return False
 
     async def on_error(self, error: Exception, item: Item, interaction: discord.Interaction) -> None:
-        print(f"Error processing interaction: {error}")
+        logger.error(f"Error processing interaction: {error}")
         await interaction.response.send_message("An error occurred while processing your request. Please try again later.", ephemeral=True)
 
 class ApplicationStartButton(Button):
@@ -962,4 +947,4 @@ class ApplicationStartView(View):
                     del self.bot.active_applications[str(user_id)]
                     save_active_applications(self.bot.active_applications)
         except Exception as e:
-            print(f"Error sending expiration message: {e}") 
+            logger.error(f"Error sending expiration message: {e}") 

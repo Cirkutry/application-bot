@@ -4,9 +4,13 @@ import discord
 import pathlib
 from dotenv import load_dotenv
 import uuid
+import logging
 from application_components import StaffApplicationView
 import traceback
 from panel_utils import load_panels, save_panels
+
+# Get logger
+logger = logging.getLogger(__name__)
 
 # Get Discord bot token
 load_dotenv()
@@ -32,7 +36,7 @@ def load_panels():
         with open(PANELS_FILE, 'r') as f:
             return json.load(f)
     except Exception as e:
-        print(f"Error loading panels: {str(e)}")
+        logger.error(f"Error loading panels: {str(e)}")
         return {}
 
 def save_panels(panels):
@@ -42,7 +46,7 @@ def save_panels(panels):
             json.dump(panels, f, indent=4)
         return True
     except Exception as e:
-        print(f"Error saving panels: {str(e)}")
+        logger.error(f"Error saving panels: {str(e)}")
         return False
 
 async def register_panels(bot):
@@ -91,8 +95,8 @@ async def register_panels(bot):
             
             registered_count += 1
         except Exception as e:
-            print(f"Error registering panel: {e}")
-            print(f"Error traceback: {traceback.format_exc()}")
+            logger.error(f"Error registering panel: {e}")
+            logger.error(f"Error traceback: {traceback.format_exc()}")
             continue  # Continue with next panel even if this one fails
     
     return registered_count
@@ -166,6 +170,6 @@ async def create_panel(bot, channel_id, positions, embed_data):
         return panel_id
         
     except Exception as e:
-        print(f"Error creating panel: {e}")
-        print(f"Error traceback: {traceback.format_exc()}")
+        logger.error(f"Error creating panel: {e}")
+        logger.error(f"Error traceback: {traceback.format_exc()}")
         return None

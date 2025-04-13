@@ -11,6 +11,9 @@ from logging.handlers import RotatingFileHandler
 import json
 import pathlib
 
+# Get logger
+logger = logging.getLogger(__name__)
+
 def ensure_directories():
     """Create all required directories if they don't exist."""
     directories = [
@@ -22,7 +25,6 @@ def ensure_directories():
     
     for directory in directories:
         pathlib.Path(directory).mkdir(exist_ok=True)
-        print(f"Ensured directory exists: {directory}")
     
     # Create empty files if they don't exist
     files = [
@@ -34,7 +36,7 @@ def ensure_directories():
         if not os.path.exists(file_path):
             with open(file_path, 'w') as f:
                 f.write(default_content)
-            print(f"Created default file: {file_path}")
+            logger.info(f"Created default file: {file_path}")
 
 # Ensure directories exist before configuring logging
 ensure_directories()
