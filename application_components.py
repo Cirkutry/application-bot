@@ -891,13 +891,11 @@ class ApplicationStartButton(Button):
             # but we're being explicit to make the code clearer
             dm_channel = interaction.channel
             total_questions = len(app_data['questions'])
-            await dm_channel.send(f"**Question 1 of {total_questions}:** {app_data['questions'][0]}")
             await dm_channel.send("⏰ **Note:** You have 90 minutes to complete all questions in this application.")
+            await dm_channel.send(f"**Question 1 of {total_questions}:** {app_data['questions'][0]}")
             
-            # Disable the buttons in the original message
-            for item in self.view.children:
-                item.disabled = True
-            await interaction.message.edit(view=self.view)
+            # Remove the buttons in the original message
+            await interaction.message.edit(view=None)
         else:
             # Cancel the application
             # Remove the application from active applications
@@ -909,10 +907,8 @@ class ApplicationStartButton(Button):
             await interaction.response.defer()
             await interaction.channel.send("Application cancelled. You can apply again at any time.")
             
-            # Disable the buttons in the original message
-            for item in self.view.children:
-                item.disabled = True
-            await interaction.message.edit(view=self.view)
+            # Remove the buttons in the original message
+            await interaction.message.edit(view=None)
         
         # Stop listening for button presses
         self.view.stop()
