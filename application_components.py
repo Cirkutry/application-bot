@@ -136,30 +136,32 @@ async def handle_dm_message(bot, message):
             try:
                 log_channel = bot.get_channel(int(log_channel_id))
                 if log_channel:
-                    # Create embed for the application
-                    embed = discord.Embed(
-                        title=f"{message.author.name}'s application for {application['position']}",
-                        description=f"Applicant: {message.author.mention} ({message.author.id})",
-                        color=0x808080
-                    )
-                    
-                    # Add application ID and timestamp
-                    embed.add_field(
-                        name="Application ID",
-                        value=application_id,
-                        inline=True
-                    )
-                    
                     # Add link to application in web dashboard
                     web_host = os.getenv('WEB_HOST', 'localhost')
                     web_port = os.getenv('WEB_PORT', '8080')
                     application_url = f"http://{web_host}:{web_port}/application/{application_id}"
                     
-                    embed.add_field(
-                        name="View Application",
-                        value=f"[Click here to view the full application]({application_url})",
-                        inline=False
+                    # Create embed for the application
+                    embed = discord.Embed(
+                        title=f"{message.author.name}'s {application['position']} application",
+                        description=f"Applicant: {message.author.mention} ({message.author.id})",
+                        color=0x808080
                     )
+                    
+                    # Add application URL and joined timestamp to the description
+                    embed.description += f"\n\n[Click here to view the application]({application_url})"
+                    
+                    # Get guild member to access joined_at timestamp
+                    guild = log_channel.guild
+                    member = guild.get_member(message.author.id)
+                    if member and member.joined_at:
+                        embed.description += f"\n\nJoined server: <t:{int(member.joined_at.timestamp())}:R>"
+                    
+                    # Set the user's avatar as thumbnail
+                    embed.set_thumbnail(url=message.author.display_avatar.url)
+                    
+                    # Set footer with App ID
+                    embed.set_footer(text=f"{application_id}")
                     
                     # Add view with buttons
                     view = ApplicationResponseView(application_id, application['position'])
