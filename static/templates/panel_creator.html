@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Panel Creator{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Panel Creator</h1>
+</div>
+
+<div class="card panel-creator">
+    <form id="panelForm" onsubmit="submitPanel(event)">
+        <div class="form-section">
+            <h3>Channel Settings</h3>
+            <div class="form-group">
+                <label for="channelId">Channel ID*</label>
+                <input type="text" id="channelId" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Embed Settings</h3>
+            <div class="form-group">
+                <label for="embedTitle">Title*</label>
+                <input type="text" id="embedTitle" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="embedUrl">Title URL</label>
+                <input type="text" id="embedUrl" class="form-control" >
+            </div>
+            <div class="form-group">
+                <label for="embedDescription">Description*</label>
+                <textarea id="embedDescription" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="embedColor">Color*</label>
+                <div class="color-picker-container">
+                    <input type="text" id="embedColor" class="form-control color-input" value="#5865F2" placeholder="#RRGGBB">
+                    <input type="color" id="embedColorPicker" class="color-picker" value="#5865F2">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="embedAuthorName">Author Name</label>
+                <input type="text" id="embedAuthorName" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="embedAuthorUrl">Author URL</label>
+                <input type="text" id="embedAuthorUrl" class="form-control" >
+            </div>
+            <div class="form-group">
+                <label for="embedAuthorIconUrl">Author Icon URL</label>
+                <input type="text" id="embedAuthorIconUrl" class="form-control" >
+            </div>
+            <div class="form-group">
+                <label for="embedThumbnailUrl">Thumbnail URL</label>
+                <input type="text" id="embedThumbnailUrl" class="form-control" >
+            </div>
+            <div class="form-group">
+                <label for="embedImageUrl">Image URL</label>
+                <input type="text" id="embedImageUrl" class="form-control" >
+            </div>
+            <div class="form-group">
+                <label for="embedFooterText">Footer Text</label>
+                <input type="text" id="embedFooterText" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="embedFooterIconUrl">Footer Icon URL</label>
+                <input type="text" id="embedFooterIconUrl" class="form-control" >
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Positions</h3>
+            {% if positions %}
+            <div class="form-group">
+                <div class="positions-grid">
+                    {% for position in positions %}
+                    <label class="position-checkbox">
+                        <input type="checkbox" name="positions" value="{{ position }}">
+                        <span>{{ position }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="no-positions-message">
+                <p>No positions added yet. Click the "Add Position" button to get started.</p>
+                <a href="/positions" class="btn btn-secondary">Add Positions</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-paper-plane"></i>
+                Deploy Panel
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body" id="toast-message"></div>
+    </div>
+</div>
+
+<script>
+async function submitPanel(event) {
+    event.preventDefault();
+    
+    // Get selected positions
+    const selectedPositions = Array.from(document.querySelectorAll('input[name="positions"]:checked'))
+        .map(checkbox => checkbox.value);
+    
+    if (selectedPositions.length === 0) {
+        showErrorToast('Please select at least one position');
+        return;
+    }
+
+    // Validate URLs
+    const urlFields = ['embedUrl', 'embedAuthorUrl', 'embedAuthorIconUrl', 'embedThumbnailUrl', 'embedImageUrl', 'embedFooterIconUrl'];
+    for (const fieldId of urlFields) {
+        const input = document.getElementById(fieldId);
+        if (input.value && !isValidUrl(input.value)) {
+            input.classList.add('is-invalid');
+            const tooltip = new bootstrap.Tooltip(input, {
+                title: 'Please enter a valid URL (e.g., https://example.com)',
+                placement: 'right',
+                trigger: 'manual'
+            });
+            tooltip.show();
+            
+            // Scroll to the invalid input
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            setTimeout(() => {
+                tooltip.dispose();
+                input.classList.remove('is-invalid');
+            }, 3000);
+            return;
+        }
+    }
+    
+    // Get form data
+    const formData = new FormData(event.target);
+    const data = {
+        channel_id: document.getElementById('channelId').value,
+        title: document.getElementById('embedTitle').value,
+        url: document.getElementById('embedUrl').value || null,
+        description: document.getElementById('embedDescription').value,
+        color: document.getElementById('embedColor').value,
+        author: {
+            name: document.getElementById('embedAuthorName').value || null,
+            url: document.getElementById('embedAuthorUrl').value || null,
+            icon_url: document.getElementById('embedAuthorIconUrl').value || null
+        },
+        thumbnail: {
+            url: document.getElementById('embedThumbnailUrl').value || null
+        },
+        image: {
+            url: document.getElementById('embedImageUrl').value || null
+        },
+        footer: {
+            text: document.getElementById('embedFooterText').value || null,
+            icon_url: document.getElementById('embedFooterIconUrl').value || null
+        },
+        positions: selectedPositions
+    };
+    
+    try {
+        const response = await fetch('/api/panels/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            showSuccessToast('Panel created successfully');
+            // Clear the form fields
+            document.getElementById('panelForm').reset();
+        } else {
+            const responseText = await response.text();
+            if (responseText.includes("'channel_id'")) {
+                showErrorToast('Invalid channel ID, it must be a number');
+            } else {
+                showErrorToast(`Failed to create panel: ${responseText}`);
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showErrorToast('An error occurred while creating the panel');
+    }
+}
+
+// URL validation function
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+// Color picker functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const colorInput = document.getElementById('embedColor');
+    const colorPicker = document.getElementById('embedColorPicker');
+
+    // Update color picker when hex input changes
+    colorInput.addEventListener('input', function(e) {
+        const value = e.target.value;
+        if (/^#[0-9A-F]{6}$/i.test(value)) {
+            colorPicker.value = value;
+        }
+    });
+
+    // Update hex input when color picker changes
+    colorPicker.addEventListener('input', function(e) {
+        colorInput.value = e.target.value;
+    });
+
+    // Validate hex color on blur
+    colorInput.addEventListener('blur', function(e) {
+        const value = e.target.value;
+        if (!/^#[0-9A-F]{6}$/i.test(value)) {
+            e.target.value = '#5865F2'; // Reset to default if invalid
+            colorPicker.value = '#5865F2';
+        }
+    });
+});
+</script>
+
+<style>
+.tooltip {
+    --bs-tooltip-bg: var(--bs-danger);
+    --bs-tooltip-opacity: 1;
+}
+.tooltip-inner {
+    max-width: 300px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+</style>
+
+{% block extra_js %}
+<script src="/static/js/utils.js"></script>
+{% endblock %}
+{% endblock %} 

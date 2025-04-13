@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Server Info -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            {% if server.icon %}
+            <img src="{{ server.icon }}" alt="{{ server.name }}" class="server-icon me-3">
+            {% endif %}
+            <div>
+                <h2 class="card-title mb-0">{{ server.name }}</h2>
+                <p class="text mb-0">Welcome, {{ user.name }}!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Viewer Role Management (Admin Only) -->
+    {% if is_admin %}
+    <div class="col-lg-4 col-md-12 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Viewer Role Management</h5>
+            </div>
+            <div class="card-body">
+                <p>Roles set here will be able to view applications but not modify them.</p>
+                
+                <div class="form-group">
+                    <select class="form-control" id="viewerRoles" multiple>
+                        {% for role in roles %}
+                        <option value="{{ role.id }}" {% if role.id in viewer_roles %}selected{% endif %}>
+                            @{{ role.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="d-grid mt-3">
+                    <button id="save-roles" class="btn btn-primary" onclick="saveViewerRoles()">
+                        <i class="fas fa-save me-1"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Select2 initialization removed to keep native select element
+});
+
+function saveViewerRoles() {
+    const selectedRoles = $('#viewerRoles').val() || [];
+    
+    fetch('/api/viewer-roles/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ roles: selectedRoles })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Viewer roles updated successfully', 'success');
+        } else {
+            showToast(data.error || 'Failed to update viewer roles', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Failed to update viewer roles', 'danger');
+    });
+}
+</script>
+{% endblock %}
