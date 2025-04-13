@@ -43,7 +43,7 @@
                                 </p>
                                 {% if application.status == 'approved' %}
                                 <span class="status-badge status-enabled">{{ application.status|title }}</span>
-                                {% elif application.status == 'reject' %}
+                                {% elif application.status == 'rejected' %}
                                 <span class="status-badge status-disabled">{{ application.status|title }}</span>
                                 {% else %}
                                 <span class="status-badge status-warning">{{ application.status|title }}</span>

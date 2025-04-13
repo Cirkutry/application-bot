@@ -65,7 +65,7 @@
                         <td>
                             {% if app.status == 'approved' %}
                             <span class="status-badge status-enabled">{{ app.status|title }}</span>
-                            {% elif app.status == 'reject' %}
+                            {% elif app.status == 'rejected' %}
                             <span class="status-badge status-disabled">{{ app.status|title }}</span>
                             {% else %}
                             <span class="status-badge status-warning">{{ app.status|title }}</span>
