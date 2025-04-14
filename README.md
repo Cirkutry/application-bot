@@ -1,4 +1,12 @@
-# Simple Applications Bot (SAB)
+<div align="center">
+
+<img src="https://i.imgur.com/4bgjXNK.png" width="700" style="border-radius: 15px;"/>
+
+<h3>Simple Applications Bot</h3><br>
+
+[![Discord](https://img.shields.io/discord/1352548670532227072?label=discord&amp;color=7289DA&amp;style=for-the-badge)](https://discord.gg/EBM9MKkD7F)
+
+</div>
 
 ## Overview
 SAB or Simple Applications Bot is a Discord bot designed in Python to streamline and manage application processes within Discord servers. It allows server administrators to create custom application forms, manage submissions, and review applications that comes with a intuitive web dashboard.
@@ -10,9 +18,6 @@ At it's current iteration each running instance of the bot only supports managin
 - **High customisability**: Configure pretty much every aspect of the bot!
 - **Web Dashboard**: Bot comes with a powerful yet simple internal dashboard to manage the various aspects of the bot!
 - **Thread Creation**: Automatically create threads to discuss applicants with your staff members!
-
-For support:
-[![Discord](https://img.shields.io/discord/1352548670532227072?label=discord&amp;color=7289DA&amp;style=for-the-badge)](https://discord.gg/EBM9MKkD7F)
 
 ## Installation
 
@@ -73,25 +78,47 @@ Required environment variables:
 	1. Click the `New Application` button
 	2. Give your application a name, accept the terms of service and click `Create`
 
-	![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-1.png)
+	<details closed>
+	  <summary>Step 2</summary>
+	
+	  ![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-1.png)
+	
+	</details>
+	
 3. In the page that appears you can add a logo, description, or links to your terms of service and privacy policy if you wish to, and then click `Save Changes`.
 
-	![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-2.png)
-
-4. Go to the `OAuth2` page and click `Reset Secret`, then `Yes, do it!`.
+	<details closed>
+	  <summary>Step 3 preview</summary>
+	
+	  ![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-2.png)
+	
+	</details>
+ 
+5. Go to the `OAuth2` page and click `Reset Secret`, then `Yes, do it!`.
 	**Copy the new secret and set it as your `OAUTH_CLIENT_SECRET` environment variable.**
 
-	![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-3.png)
-5. Click `Add Redirect` and enter the `WEB_HOST` followed by `WEB_PORT`, preceeded by either `http://` or `https://` environment variable, followed by `/auth/callback`.
+	<details closed>
+	  <summary>Step 4 preview</summary>
+	
+	  ![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-3.png)
+	
+	</details>
+ 
+7. Click `Add Redirect` and enter the `WEB_HOST` followed by `WEB_PORT`, preceeded by either `http://` or `https://` environment variable, followed by `/auth/callback`.
 	Then click `Save Changes`.
 
+	<details closed>
+	  <summary>Step 5 preview</summary>
+	
+	  ![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-4.png)
+	
+	</details>
+ 
 > [!IMPORTANT]
 > Examples:
 > - `http://12.345.67.89:8080/auth/callback`
 > - `http://localhost:8080/auth/callback`
 > - `https://example.com/auth/callback`
-
-![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-4.png)
 
 6. Also in the same page copy the `CLIENT ID` by hitting the `COPY` button and set it as your `OAUTH_CLIENT_ID` environment variable.
 7. Navigate to the `Bot` page
@@ -99,11 +126,21 @@ Required environment variables:
 	1. Click `View Token`, then **copy the token and set it as your `TOKEN` environment variable.**
 	2. We highly recommend disabling the "Public Bot" option to prevent other people from adding your bot to their servers. Before you can do so, you will need to go to to the `Installation` page and set `Install Link` to `None`. After saving changes, return to the `Bot` page and disable the "Public Bot" option.
 
-	![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-5.png)
+	<details closed>
+	  <summary>Step 7.2 preview</summary>
+	
+	  ![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-5.png)
+	
+	</details>
 
 	3. **Enable the `presence`, `server members` and `message content` intents.**
 
-	![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-6.png)
+	<details closed>
+	  <summary>Step 7.3 preview</summary>
+	
+	  ![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-6.png)
+	
+	</details>
 
 To add the bot to your server, use the below URL after replacing the `client_id=` value with yours.
 ```txt
@@ -112,9 +149,13 @@ https://discord.com/oauth2/authorize?client_id=123456789&scope=bot
 
 ## Credits
 
-Discord Application creation guide images taken from https://github.com/discord-tickets/docs
+Discord Developer Portal setup guide adapted from https://github.com/discord-tickets/docs
 
 ## License
 Simple Applications Bot is licensed under the [GPLv3 license](https://github.com/discord-tickets/bot/blob/main/LICENSE).
 
 This is not an official Discord product. It is not affiliated with nor endorsed by Discord Inc.
+
+<p align="center">
+  <img width="1400" src="https://capsule-render.vercel.app/api?type=waving&height=200&color=timeGradient&section=footer&reversal=false"/>
+</p>
