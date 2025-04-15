@@ -21,9 +21,9 @@ load_dotenv()
 pathlib.Path('storage').mkdir(exist_ok=True)
 
 # Configure applications directory
-APPS_DIRECTORY = 'storage'
+APPS_DIRECTORY = 'storage/applications'
 pathlib.Path(APPS_DIRECTORY).mkdir(exist_ok=True)
-ACTIVE_APPS_FILE = os.path.join(APPS_DIRECTORY, 'active_applications.json')
+ACTIVE_APPS_FILE = os.path.join('storage', 'active_applications.json')
 
 # Function to load active applications from file
 def load_active_applications():
