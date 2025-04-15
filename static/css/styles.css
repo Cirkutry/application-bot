@@ -18,7 +18,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Josefin Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: var(--text);
     background-color: var(--background);
@@ -572,25 +572,6 @@ h6 {
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
     color: var(--text);
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .table-responsive {
-        margin: 0 -1rem;
-    }
-    
-    .table th, .table td {
-        padding: 0.75rem;
-    }
-    
-    .btn-group {
-        flex-wrap: wrap;
-    }
-    
-    .btn-group .btn {
-        margin-bottom: 0.25rem;
-    }
 }
 
 /* Panel Creator Styles */
