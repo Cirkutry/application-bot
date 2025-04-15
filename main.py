@@ -98,29 +98,35 @@ bot = None
 web_runner = None
 web_site = None
 shutdown_event = asyncio.Event()
+shutdown_lock = asyncio.Lock()
 
 async def shutdown():
-    logging.info("Starting shutdown...")
-    
-    # Set shutdown event
-    shutdown_event.set()
-    
-    # Close web server
-    if web_runner:
-        logging.info("Closing web server...")
-        await web_runner.cleanup()
-    
-    # Close bot
-    if bot:
-        logging.info("Closing bot connection...")
-        await bot.close()
-    
-    logging.info("Shutdown complete")
+    # Prevent multiple simultaneous shutdowns
+    async with shutdown_lock:
+        if shutdown_event.is_set():
+            return
+            
+        logging.info("Starting shutdown...")
+        shutdown_event.set()
+        
+        # Close web server
+        if web_runner:
+            logging.info("Closing web server...")
+            await web_runner.cleanup()
+        
+        # Close bot
+        if bot:
+            logging.info("Closing bot connection...")
+            await bot.close()
+        
+        logging.info("Shutdown complete")
+        # Force exit after shutdown
+        os._exit(0)
 
 def signal_handler(signum, frame):
     logging.info(f"Received signal {signum}, initiating shutdown...")
-    # Don't create a new task, just set the shutdown event
-    shutdown_event.set()
+    # Create a task to handle shutdown asynchronously
+    asyncio.create_task(shutdown())
 
 async def handle_exception(loop, context):
     exception = context.get('exception')
@@ -212,7 +218,15 @@ async def main():
     # Run bot
     try:
         # Start the bot
-        bot_task = asyncio.create_task(bot.start(TOKEN))
+        try:
+            await bot.start(TOKEN)
+        except discord.PrivilegedIntentsRequired as e:
+            logging.error("Required Privileged Gateway Intents are disabled for this bot.")
+            logging.error("Make sure Server Members and Message Content intents are enabled in the Discord Developer Portal.")
+            await shutdown()
+        except Exception as e:
+            logging.error(f"Failed to start bot: {str(e)}")
+            await shutdown()
         
         # Wait for either the bot to complete or the shutdown event to be set
         while not shutdown_event.is_set():
