@@ -11,6 +11,21 @@ from logging.handlers import RotatingFileHandler
 import json
 import pathlib
 
+COLOR = "\033[38;2;243;221;182m"
+RESET = "\033[0m"
+
+# Print startup logo
+print(f"{COLOR}")
+print("""
+            ███████╗ █████╗ ██████╗ 
+            ██╔════╝██╔══██╗██╔══██╗
+            ███████╗███████║██████╔╝
+            ╚════██║██╔══██║██╔══██╗
+            ███████║██║  ██║██████╔╝
+            ╚══════╝╚═╝  ╚═╝╚═════╝ 
+""")
+print(f"Simple Applications Bot by Kre0lidge - Starting up...\n{RESET}")
+
 # Get logger
 logger = logging.getLogger(__name__)
 
