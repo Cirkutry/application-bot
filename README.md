@@ -133,14 +133,7 @@ Required environment variables:
 	
 	</details>
 
-	3. **Enable the `presence`, `server members` and `message content` intents.**
-
-	<details closed>
-	  <summary>Step 7.3 preview</summary>
-	
-	  ![Screenshot](https://raw.githubusercontent.com/discord-tickets/docs/refs/heads/main/docs/img/discord-application-6.png)
-	
-	</details>
+	3. **Enable the `server members` and `message content` intents.**
 
 To add the bot to your server, use the below URL after replacing the `client_id=` value with yours.
 ```txt

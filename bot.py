@@ -7,9 +7,7 @@ import json
 import pathlib
 import datetime
 import logging
-from question_manager import get_questions, load_questions
-import uuid
-from discord.ext import commands
+from question_manager import load_questions
 from application_components import StaffApplicationView, ApplicationResponseView
 import traceback
 

@@ -1,6 +1,7 @@
 import discord
 from discord.ui import Select, View, Button, Modal, TextInput, Item
 import datetime
+from datetime import UTC
 import os
 from question_manager import get_questions, load_questions
 import json
@@ -68,7 +69,7 @@ async def handle_dm_message(bot, message):
     # Check if the application has a start_time and if 90 minutes have passed
     if 'start_time' in application:
         start_time = datetime.datetime.fromisoformat(application['start_time'])
-        current_time = datetime.datetime.utcnow()
+        current_time = datetime.datetime.now(UTC)
         time_elapsed = (current_time - start_time).total_seconds() / 60  # Convert to minutes
         
         # If more than 90 minutes have passed, cancel the application
@@ -885,7 +886,7 @@ class ApplicationStartButton(Button):
             
             # Add a start_time to the application data to track the 90-minute limit
             if hasattr(self.view.bot, 'active_applications') and str(interaction.user.id) in self.view.bot.active_applications:
-                self.view.bot.active_applications[str(interaction.user.id)]['start_time'] = datetime.datetime.utcnow().isoformat()
+                self.view.bot.active_applications[str(interaction.user.id)]['start_time'] = datetime.datetime.now(UTC).isoformat()
                 save_active_applications(self.view.bot.active_applications)
             
             # Send the first question to the DM channel

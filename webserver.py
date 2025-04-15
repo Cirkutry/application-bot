@@ -7,18 +7,17 @@ import json
 import secrets
 import urllib.parse
 import datetime
+from datetime import UTC
 import discord
-from discord.utils import get
 import aiohttp_jinja2
 import jinja2
-from question_manager import load_questions, save_questions, get_questions, add_position, delete_position, update_position_settings, add_question_to_position, remove_question, update_question, reorder_questions
-from panels_manager import load_panels, save_panels, register_panels
-from application_components import StaffApplicationSelect, StaffApplicationView, ApplicationResponseView
+from question_manager import load_questions, save_questions
+from panels_manager import load_panels, save_panels
+from application_components import StaffApplicationView
 import math
 import uuid
 import logging
 from panel_utils import load_panels, save_panels
-from panels_manager import register_panels
 
 # Load environment variables
 load_dotenv()
@@ -916,7 +915,7 @@ async def update_application_status(request):
         application['processed_by'] = {
             'id': request['user']['user_id'],
             'name': request['user']['name'],
-            'timestamp': datetime.datetime.utcnow().isoformat()
+            'timestamp': datetime.datetime.now(UTC).isoformat()
         }
         
         # Save application
