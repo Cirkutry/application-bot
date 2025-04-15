@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 def ensure_directories():
     directories = [
         'storage',
-        'storage/panels',
         'storage/applications',
         'storage/logs'
     ]

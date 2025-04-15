@@ -23,7 +23,7 @@ APPS_DIRECTORY = 'storage/applications'
 pathlib.Path(APPS_DIRECTORY).mkdir(exist_ok=True)
 
 # Configure panels directory
-PANELS_DIRECTORY = 'storage/panels'
+PANELS_DIRECTORY = 'storage'
 pathlib.Path(PANELS_DIRECTORY).mkdir(exist_ok=True)
 PANELS_FILE = os.path.join(PANELS_DIRECTORY, 'panels.json')
 

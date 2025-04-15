@@ -21,7 +21,7 @@ load_dotenv()
 pathlib.Path('storage').mkdir(exist_ok=True)
 
 # Configure applications directory
-APPS_DIRECTORY = 'storage/applications'
+APPS_DIRECTORY = 'storage'
 pathlib.Path(APPS_DIRECTORY).mkdir(exist_ok=True)
 ACTIVE_APPS_FILE = os.path.join(APPS_DIRECTORY, 'active_applications.json')
 

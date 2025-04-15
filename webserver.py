@@ -46,7 +46,7 @@ oauth_states = {}
 sessions = {}
 
 # Create panels directory if it doesn't exist
-PANELS_DIRECTORY = 'storage/panels'
+PANELS_DIRECTORY = 'storage'
 pathlib.Path(PANELS_DIRECTORY).mkdir(exist_ok=True)
 
 # Setup Jinja2 environment
@@ -213,9 +213,6 @@ async def get_application_stats():
 async def load_applications():
     applications = []
     for filename in os.listdir(APPS_DIRECTORY):
-        # Skip active_applications.json file
-        if filename == 'active_applications.json':
-            continue
         if filename.endswith('.json'):
             with open(os.path.join(APPS_DIRECTORY, filename), 'r') as f:
                 app = json.load(f)
