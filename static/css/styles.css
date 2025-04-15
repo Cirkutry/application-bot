@@ -510,6 +510,12 @@ textarea.form-control {
     --bs-tooltip-color: var(--text);
 }
 
+.tooltip-inner {
+    max-width: 300px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
 /* Form Labels */
 .form-label {
     color: var(--text);
