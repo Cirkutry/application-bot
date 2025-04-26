@@ -1049,6 +1049,9 @@ async def edit_position(request):
 
     # Get user info
     user = await get_user_info(request['user']['user_id'])
+    
+    # Get server info
+    server = await get_server_info()
 
     return aiohttp_jinja2.render_template('edit_position.html', 
                                          request,
@@ -1058,7 +1061,8 @@ async def edit_position(request):
                                              'channels': channels,
                                              'roles': roles,
                                              'user': user,
-                                             'is_admin': request['user_permissions']['is_admin']
+                                             'is_admin': request['user_permissions']['is_admin'],
+                                             'server': server
                                          })
 
 # Create and run the app

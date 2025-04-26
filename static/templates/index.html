@@ -52,33 +52,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Select2 initialization removed to keep native select element
-});
-
-function saveViewerRoles() {
-    const selectedRoles = $('#viewerRoles').val() || [];
-    
-    fetch('/api/viewer-roles/update', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ roles: selectedRoles })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showToast('Viewer roles updated successfully', 'success');
-        } else {
-            showToast(data.error || 'Failed to update viewer roles', 'danger');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('Failed to update viewer roles', 'danger');
-    });
-}
-</script>
+<script src="/static/js/utils.js"></script>
 {% endblock %}

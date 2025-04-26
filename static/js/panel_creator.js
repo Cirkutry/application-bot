@@ -1,39 +1,91 @@
-// Panel management functions
 async function submitPanel(event) {
     event.preventDefault();
-    const panelName = document.getElementById('panelName').value.trim();
-    const panelDescription = document.getElementById('panelDescription').value.trim();
-    const panelColor = document.getElementById('panelColor').value;
-    const panelEmoji = document.getElementById('panelEmoji').value;
-    const panelRoles = Array.from(document.getElementById('panelRoles').selectedOptions).map(option => option.value);
     
-    if (!panelName) {
-        showErrorToast('Please enter a panel name');
+    // Check channel ID first
+    const channelId = document.getElementById('channelId').value.trim();
+    if (!channelId) {
+        showErrorToast('Please enter a Channel ID');
         return;
     }
 
+    // Check title and description
+    const title = document.getElementById('embedTitle').value.trim();
+    if (!title) {
+        showErrorToast('Please enter a title');
+        return;
+    }
+
+    const description = document.getElementById('embedDescription').value.trim();
+    if (!description) {
+        showErrorToast('Please enter a description');
+        return;
+    }
+    
+    // Get selected positions
+    const selectedPositions = Array.from(document.querySelectorAll('input[name="positions"]:checked'))
+        .map(checkbox => checkbox.value);
+    
+    if (selectedPositions.length === 0) {
+        showErrorToast('Please select at least one position');
+        return;
+    }
+
+    // Validate URLs
+    const urlFields = ['embedUrl', 'embedAuthorUrl', 'embedAuthorIconUrl', 'embedThumbnailUrl', 'embedImageUrl', 'embedFooterIconUrl'];
+    for (const fieldId of urlFields) {
+        const input = document.getElementById(fieldId);
+        if (input.value && !isValidUrl(input.value)) {
+            input.classList.add('is-invalid');
+            showErrorToast('Please enter a valid URL (https://example.com)');
+            return;
+        }
+    }
+    
+    // Get form data
+    const data = {
+        channel_id: channelId,
+        title: title,
+        url: document.getElementById('embedUrl').value || null,
+        description: description,
+        color: document.getElementById('embedColor').value,
+        author: {
+            name: document.getElementById('embedAuthorName').value || null,
+            url: document.getElementById('embedAuthorUrl').value || null,
+            icon_url: document.getElementById('embedAuthorIconUrl').value || null
+        },
+        thumbnail: {
+            url: document.getElementById('embedThumbnailUrl').value || null
+        },
+        image: {
+            url: document.getElementById('embedImageUrl').value || null
+        },
+        footer: {
+            text: document.getElementById('embedFooterText').value || null,
+            icon_url: document.getElementById('embedFooterIconUrl').value || null
+        },
+        positions: selectedPositions
+    };
+    
     try {
-        const response = await fetch('/api/panels', {
+        const response = await fetch('/api/panels/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                name: panelName,
-                description: panelDescription,
-                color: panelColor,
-                emoji: panelEmoji,
-                roles: panelRoles
-            })
+            body: JSON.stringify(data)
         });
-
+        
         if (response.ok) {
             showSuccessToast('Panel created successfully');
-            document.getElementById('createPanelForm').reset();
-            closeCreatePanelModal();
+            // Clear the form fields
+            document.getElementById('panelForm').reset();
         } else {
             const responseText = await response.text();
-            showErrorToast(`Failed to create panel: ${responseText}`);
+            if (responseText.includes("'channel_id'")) {
+                showErrorToast('Invalid channel ID, it must be a number');
+            } else {
+                showErrorToast(`Failed to create panel: ${responseText}`);
+            }
         }
     } catch (error) {
         console.error('Error:', error);
@@ -41,80 +93,43 @@ async function submitPanel(event) {
     }
 }
 
-async function deletePanel(panelId) {
-    if (!confirm('Are you sure you want to delete this panel?')) {
-        return;
-    }
-
+// URL validation function
+function isValidUrl(string) {
     try {
-        const response = await fetch(`/api/panels/${panelId}`, {
-            method: 'DELETE'
-        });
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
 
-        if (response.ok) {
-            showSuccessToast('Panel deleted successfully');
-            // Remove the panel from the UI
-            const panelElement = document.getElementById(`panel-${panelId}`);
-            if (panelElement) {
-                panelElement.remove();
-            }
-        } else {
-            const responseText = await response.text();
-            showErrorToast(`Failed to delete panel: ${responseText}`);
+// Color picker functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const colorInput = document.getElementById('embedColor');
+    const colorPicker = document.getElementById('embedColorPicker');
+
+    // Update color picker when hex input changes
+    colorInput.addEventListener('input', function(e) {
+        const value = e.target.value;
+        if (/^#[0-9A-F]{6}$/i.test(value)) {
+            colorPicker.value = value;
         }
-    } catch (error) {
-        console.error('Error:', error);
-        showErrorToast('An error occurred while deleting the panel');
-    }
-}
+    });
 
-// Modal functions
-function openCreatePanelModal() {
-    document.getElementById('createPanelModal').style.display = 'block';
-    document.getElementById('panelName').value = '';
-    document.getElementById('panelDescription').value = '';
-    document.getElementById('panelName').focus();
-}
+    // Update hex input when color picker changes
+    colorPicker.addEventListener('input', function(e) {
+        colorInput.value = e.target.value;
+    });
 
-function closeCreatePanelModal() {
-    document.getElementById('createPanelModal').style.display = 'none';
-}
-
-// Channel settings form submission
-async function submitChannelSettings(event) {
-    event.preventDefault();
-    const channelId = document.getElementById('channelId').value.trim();
-    const panelId = document.getElementById('panelId').value;
-    
-    if (!channelId) {
-        showErrorToast('Please enter a channel ID');
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/panels/channel', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                panel_id: panelId,
-                channel_id: channelId
-            })
-        });
-
-        if (response.ok) {
-            showSuccessToast('Channel settings updated successfully');
-            document.getElementById('channelSettingsForm').reset();
-        } else {
-            const responseText = await response.text();
-            showErrorToast(`Failed to update channel settings: ${responseText}`);
+    // Validate hex color on blur
+    colorInput.addEventListener('blur', function(e) {
+        const value = e.target.value;
+        if (!/^#[0-9A-F]{6}$/i.test(value)) {
+            e.target.value = '#5865F2';
+            colorPicker.value = '#5865F2';
         }
-    } catch (error) {
-        console.error('Error:', error);
-        showErrorToast('An error occurred while updating channel settings');
-    }
-}
+    });
+});
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -122,12 +137,4 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize Select2 for all select elements
     initializeSelect2('select');
-    
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-        const modal = document.getElementById('createPanelModal');
-        if (event.target == modal) {
-            closeCreatePanelModal();
-        }
-    }
-}); 
+});

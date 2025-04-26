@@ -3,39 +3,40 @@
 {% block title %}Applications{% endblock %}
 
 {% block content %}
-<div class="table-card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0">Applications</h5>
-        <div>
-            <div class="btn-group me-2">
-                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-filter"></i> Filter
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="/applications">None</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><h6 class="dropdown-header">Status</h6></li>
-                    <li><a class="dropdown-item" href="?status=pending">Pending</a></li>
-                    <li><a class="dropdown-item" href="?status=approved">Approved</a></li>
-                    <li><a class="dropdown-item" href="?status=reject">Rejected</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><h6 class="dropdown-header">Position</h6></li>
-                    {% for position in positions %}
-                    <li><a class="dropdown-item" href="?position={{ position }}">{{ position }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-sort"></i> Sort
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="?sort=newest">Newest First</a></li>
-                    <li><a class="dropdown-item" href="?sort=oldest">Oldest First</a></li>
-                </ul>
-            </div>
+<div class="header">
+    <h1>Applications</h1>
+    <div>
+        <div class="btn-group me-2">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/applications">None</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><h6 class="dropdown-header">Status</h6></li>
+                <li><a class="dropdown-item" href="?status=pending">Pending</a></li>
+                <li><a class="dropdown-item" href="?status=approved">Approved</a></li>
+                <li><a class="dropdown-item" href="?status=reject">Rejected</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><h6 class="dropdown-header">Position</h6></li>
+                {% for position in positions %}
+                <li><a class="dropdown-item" href="?position={{ position }}">{{ position }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-sort"></i> Sort
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="?sort=newest">Newest First</a></li>
+                <li><a class="dropdown-item" href="?sort=oldest">Oldest First</a></li>
+            </ul>
         </div>
     </div>
+</div>
+
+<div class="table-card">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover">

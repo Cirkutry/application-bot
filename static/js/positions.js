@@ -1,4 +1,3 @@
-// Position management functions
 async function submitPosition(event) {
     event.preventDefault();
     const positionName = document.getElementById('positionName').value.trim();
@@ -26,7 +25,7 @@ async function submitPosition(event) {
         if (response.ok) {
             document.getElementById('addPositionForm').reset();
             closeAddPositionModal();
-            // Store the success message in sessionStorage
+
             sessionStorage.setItem('toastMessage', 'Position added successfully');
             sessionStorage.setItem('toastType', 'success');
             setTimeout(() => location.reload(), 1000);
@@ -76,10 +75,9 @@ async function submitEditPosition(event) {
         });
 
         if (response.ok) {
-            // Store the success message in sessionStorage
+
             sessionStorage.setItem('toastMessage', 'Position updated successfully');
             sessionStorage.setItem('toastType', 'success');
-            // Redirect back to positions page
             window.location.href = '/positions';
         } else {
             const responseText = await response.text();
@@ -335,6 +333,11 @@ function addQuestion() {
     container.appendChild(questionElement);
 }
 
+function updateQuestionOrder() {
+    const questions = Array.from(document.querySelectorAll('.question-input')).map(input => input.value);
+    // The order is already maintained in the DOM, so we just need to collect the values
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     handleUrlParams();    
@@ -482,9 +485,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Add event delegation for question removal
+    // Add event delegation for question removal and initialize Sortable
     const questionsList = document.getElementById('questionsList');
     if (questionsList) {
+        // Initialize Sortable
+        new Sortable(questionsList, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            handle: '.drag-handle',
+            onEnd: function() {
+                // Update question order in hidden input
+                updateQuestionOrder();
+            }
+        });
+
+        // Ensure question items have unique IDs
+        const questionItems = document.querySelectorAll('.question-item');
+        questionItems.forEach((item, index) => {
+            if (!item.id) {
+                item.id = 'question_' + Date.now() + '_' + index;
+            }
+        });
+
+        // Add event delegation for question removal
         questionsList.addEventListener('click', function(event) {
             if (event.target.closest('.remove-question')) {
                 // Use the custom deleteQuestionModal instead of browser confirm dialog
@@ -528,4 +551,4 @@ document.addEventListener('DOMContentLoaded', function() {
             closeDeleteQuestionModal();
         });
     }
-}); 
+});

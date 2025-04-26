@@ -367,8 +367,9 @@ textarea.form-control {
 /* Card Footer */
 .card-footer {
     background-color: var(--bg-card);
-    border-top: 1px solid var(--border);
     padding: 1rem;
+    border-bottom-right-radius: 0.5rem !important;
+    border-bottom-left-radius: 0.5rem !important;
 }
 
 /* List Groups */
@@ -1092,6 +1093,6 @@ h6 {
 
 .table-responsive {
     background-color: var(--bg-card);
-    border-bottom-right-radius: 0.5rem;
-    border-bottom-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem !important;
+    border-top-left-radius: 0.5rem !important;
 }

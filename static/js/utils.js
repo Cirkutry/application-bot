@@ -1,4 +1,3 @@
-// Toast utility functions
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast bg-${type} text-white`;
@@ -74,4 +73,65 @@ function initializeSelect2(selector, options = {}) {
         closeOnSelect: false,
         ...options
     });
-} 
+}
+
+/**
+ * Updates the status of an application and handles the UI feedback
+ * @param {string} applicationId - The ID of the application to update
+ * @param {string} status - The new status to set
+ */
+function updateStatus(applicationId, status) {
+    if (!confirm(`Are you sure you want to ${status} this application?`)) {
+        return;
+    }
+
+    fetch(`/api/applications/${applicationId}/status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            showToast(`Application ${status}d successfully`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast(result.error || 'Failed to update application status', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Failed to update application status', 'danger');
+    });
+}
+
+/**
+ * Updates the viewer roles configuration
+ * @param {string[]} selectedRoles - Array of selected role IDs
+ * @returns {Promise} Promise that resolves when the update is complete
+ */
+function saveViewerRoles() {
+    const selectedRoles = $('#viewerRoles').val() || [];
+    
+    return fetch('/api/viewer-roles/update', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ roles: selectedRoles })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Viewer roles updated successfully', 'success');
+        } else {
+            showToast(data.error || 'Failed to update viewer roles', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Failed to update viewer roles', 'danger');
+    });
+}
