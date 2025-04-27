@@ -152,6 +152,30 @@ async def auth_middleware(request, handler):
     
     return await handler(request)
 
+@web.middleware
+async def error_middleware(request, handler):
+    try:
+        return await handler(request)
+    except web.HTTPNotFound:
+        return await handle_404(request)
+    except Exception as ex:
+        return await handler(request)
+
+async def handle_404(request):
+    # Get server info for the template
+    server_info = await get_server_info()
+    
+    # Get user info if available
+    user_info = {}
+    if 'user' in request and 'user_id' in request['user']:
+        user_info = await get_user_info(request['user']['user_id'])
+    
+    return aiohttp_jinja2.render_template('404.html', request, {
+        'user': user_info,
+        'is_admin': request.get('user_permissions', {}).get('is_admin', False),
+        'server': server_info
+    })
+
 async def get_session(request):
     session_id = request.cookies.get('session_id')
     if not session_id or session_id not in sessions:
@@ -1103,7 +1127,10 @@ async def start_web_server(bot_instance):
     global bot
     bot = bot_instance
     
-    app = web.Application()
+    # Create web application
+    app = web.Application(middlewares=[auth_middleware, error_middleware])
+    
+    # Setup Jinja2
     setup_jinja2(app)
     
     # Add routes
