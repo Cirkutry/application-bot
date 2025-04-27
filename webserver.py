@@ -1079,6 +1079,25 @@ async def edit_position(request):
                                              'server': server
                                          })
 
+@routes.get('/api/validate_channel/{channel_id}')
+@auth_required
+async def validate_channel(request):
+    channel_id = request.match_info['channel_id']
+    
+    try:
+        # Try to fetch the channel from Discord
+        channel = bot.get_channel(int(channel_id))
+        if channel is None:
+            return web.Response(status=404, text="Channel not found")
+        
+        return web.Response(status=200, text="Channel exists")
+    except ValueError:
+        # Invalid channel ID format
+        return web.Response(status=400, text="Invalid channel ID format")
+    except Exception as e:
+        # Any other error
+        return web.Response(status=500, text=f"Error: {str(e)}")
+
 # Create and run the app
 async def start_web_server(bot_instance):
     global bot

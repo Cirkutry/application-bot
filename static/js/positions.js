@@ -41,10 +41,27 @@ async function submitPosition(event) {
 async function submitEditPosition(event) {
     event.preventDefault();
     const positionName = document.getElementById('editPositionName').value;
+    const logChannelId = document.getElementById('logChannel').value.trim();
+    
+    // Validate log channel if provided
+    if (logChannelId) {
+        try {
+            const channelResponse = await fetch(`/api/validate_channel/${logChannelId}`);
+            if (!channelResponse.ok) {
+                showErrorToast('Invalid log channel ID. Please enter a valid channel ID.');
+                return;
+            }
+        } catch (error) {
+            console.error('Error validating channel:', error);
+            showErrorToast('Error validating channel ID');
+            return;
+        }
+    }
+    
     const settings = {
         enabled: document.getElementById('positionEnabled').checked,
         auto_thread: document.getElementById('autoThread').checked,
-        log_channel: document.getElementById('logChannel').value,
+        log_channel: logChannelId,
         welcome_message: document.getElementById('welcomeMessage').value,
         completion_message: document.getElementById('completionMessage').value,
         accepted_message: document.getElementById('acceptedMessage').value,

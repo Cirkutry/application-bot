@@ -35,13 +35,8 @@
                 <small class="form-text text-muted">Maximum time allowed for applicants to complete all questions.</small>
             </div>
             <div class="form-group">
-                <label for="logChannel">Log Channel</label>
-                <select class="form-control" id="logChannel">
-                    <option value="">Select a channel</option>
-                    {% for channel in channels %}
-                    <option value="{{ channel.id }}" {% if settings.log_channel == channel.id %}selected{% endif %}>#{{ channel.name }}</option>
-                    {% endfor %}
-                </select>
+                <label for="logChannel">Log Channel ID</label>
+                <input type="text" class="form-control" id="logChannel" value="{{ settings.log_channel }}">
             </div>
         </div>
 
@@ -72,7 +67,7 @@
                 <select class="form-control" id="restrictedRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.restricted_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -82,7 +77,7 @@
                 <select class="form-control" id="requiredRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.required_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -92,7 +87,7 @@
                 <select class="form-control" id="buttonRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.button_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -102,7 +97,7 @@
                 <select class="form-control" id="acceptRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.accept_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -112,7 +107,7 @@
                 <select class="form-control" id="rejectRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.reject_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -122,7 +117,7 @@
                 <select class="form-control" id="acceptReasonRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.accept_reason_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -132,7 +127,7 @@
                 <select class="form-control" id="rejectReasonRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.reject_reason_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -142,7 +137,7 @@
                 <select class="form-control" id="acceptedRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.accepted_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -152,7 +147,7 @@
                 <select class="form-control" id="deniedRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.denied_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -162,7 +157,7 @@
                 <select class="form-control" id="pingRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.ping_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -172,7 +167,7 @@
                 <select class="form-control" id="acceptedRemovalRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.accepted_removal_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
@@ -182,7 +177,7 @@
                 <select class="form-control" id="deniedRemovalRoles" multiple>
                     {% for role in roles %}
                     <option value="{{ role.id }}" {% if role.id in settings.denied_removal_roles %}selected{% endif %}>
-                        @{{ role.name }}
+                        {{ role.name }}
                     </option>
                     {% endfor %}
                 </select>
