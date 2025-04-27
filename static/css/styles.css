@@ -35,6 +35,8 @@ body {
     background-color: var(--bg-card);
     padding: 1rem;
     z-index: 1000;
+    display: flex;
+    flex-direction: column;
 }
 
 .main-content {
@@ -1106,4 +1108,16 @@ h6 {
     background-color: var(--bg-card);
     border-top-right-radius: 0.5rem !important;
     border-top-left-radius: 0.5rem !important;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 1rem;
+    text-align: center;
+    border-top: 2px solid var(--border);
+}
+
+.sidebar-footer a {
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
 }
