@@ -30,6 +30,11 @@
                 </div>
             </div>
             <div class="form-group">
+                <label for="timeLimit">Time Limit (minutes)</label>
+                <input type="number" class="form-control" id="timeLimit" min="1" max="1440" value="{{ settings.time_limit|default(60) }}">
+                <small class="form-text text-muted">Maximum time allowed for applicants to complete all questions.</small>
+            </div>
+            <div class="form-group">
                 <label for="logChannel">Log Channel</label>
                 <select class="form-control" id="logChannel">
                     <option value="">Select a channel</option>

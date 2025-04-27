@@ -57,25 +57,33 @@ async def handle_dm_message(bot, message):
     if not isinstance(message.channel, discord.DMChannel):
         return
     
+    # Ignore bot messages
+    if message.author.bot:
+        return
+
     # Initialize active_applications if needed
     if not hasattr(bot, 'active_applications'):
         bot.active_applications = load_active_applications()
-        
-    # Check if user has an active application
+
     application = bot.active_applications.get(str(message.author.id))
     if not application:
         return
         
-    # Check if the application has a start_time and if 90 minutes have passed
+    # Check if the application has a start_time and if the time limit has passed
     if 'start_time' in application:
         start_time = datetime.datetime.fromisoformat(application['start_time'])
         current_time = datetime.datetime.now(UTC)
         time_elapsed = (current_time - start_time).total_seconds() / 60  # Convert to minutes
         
-        # If more than 90 minutes have passed, cancel the application
-        if time_elapsed > 90:
+        # Get position settings to get the time limit
+        questions = load_questions()
+        position_settings = questions.get(application['position'], {})
+        time_limit = position_settings.get('time_limit', 60)  # Default to 60 minutes if not set
+        
+        # If more than the time limit has passed, cancel the application
+        if time_elapsed > time_limit:
             # Send expiration message
-            await message.channel.send("⌛ Your application has expired. You had 90 minutes to complete it. Please start a new application if you wish to apply.")
+            await message.channel.send(f"⌛ Your application has expired. You had {time_limit} minutes to complete it. Please start a new application if you wish to apply.")
             
             # Remove from active applications
             del bot.active_applications[str(message.author.id)]
@@ -912,7 +920,13 @@ class ApplicationStartButton(Button):
             # Acknowledge the interaction
             await interaction.response.defer()
             
-            # Add a start_time to the application data to track the 90-minute limit
+            # Get position settings for time limit
+            questions = load_questions()
+            position = app_data.get('position', '')
+            position_settings = questions.get(position, {})
+            time_limit = position_settings.get('time_limit', 60)  # Default to 60 minutes if not set
+            
+            # Add a start_time to the application data to track the time limit
             if hasattr(self.view.bot, 'active_applications') and str(interaction.user.id) in self.view.bot.active_applications:
                 self.view.bot.active_applications[str(interaction.user.id)]['start_time'] = datetime.datetime.now(UTC).isoformat()
                 save_active_applications(self.view.bot.active_applications)
@@ -922,7 +936,7 @@ class ApplicationStartButton(Button):
             # but we're being explicit to make the code clearer
             dm_channel = interaction.channel
             total_questions = len(app_data['questions'])
-            await dm_channel.send("⏰ **Note:** You have 90 minutes to complete all questions in this application.")
+            await dm_channel.send(f"⏰ **Note:** You have {time_limit} minutes to complete all questions in this application.")
             await dm_channel.send(f"**Question 1 of {total_questions}:** {app_data['questions'][0]}")
             
             # Remove the buttons in the original message

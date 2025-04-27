@@ -61,6 +61,7 @@ async function submitEditPosition(event) {
         ping_roles: Array.from(document.getElementById('pingRoles').selectedOptions).map(option => option.value),
         accepted_removal_roles: Array.from(document.getElementById('acceptedRemovalRoles').selectedOptions).map(option => option.value),
         denied_removal_roles: Array.from(document.getElementById('deniedRemovalRoles').selectedOptions).map(option => option.value),
+        time_limit: parseInt(document.getElementById('timeLimit').value) || 60,
         questions: Array.from(document.querySelectorAll('.question-item'))
             .map(item => item.querySelector('input').value.trim())
             .filter(question => question !== '') // Filter out empty questions
@@ -182,6 +183,7 @@ function openEditPositionModal(button) {
     // Set form values
     document.getElementById('positionEnabled').checked = data.enabled;
     document.getElementById('autoThread').checked = data.auto_thread;
+    document.getElementById('timeLimit').value = data.time_limit || 60;
     document.getElementById('logChannel').value = data.log_channel;
     document.getElementById('welcomeMessage').value = data.welcome_message;
     document.getElementById('acceptedMessage').value = data.accepted_message;

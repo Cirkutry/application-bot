@@ -36,7 +36,8 @@ def load_questions():
                     'denied_roles': [],
                     'ping_roles': [],
                     'accepted_removal_roles': [],
-                    'denied_removal_roles': []
+                    'denied_removal_roles': [],
+                    'time_limit': 60
                 }
             save_questions(new_data)
             return new_data
@@ -111,7 +112,8 @@ def add_position(position, copy_from=None):
             'ping_roles': [],
             'accepted_removal_roles': [],
             'denied_removal_roles': [],
-            'auto_thread': False
+            'auto_thread': False,
+            'time_limit': 60
         }
     
     return save_questions(questions)

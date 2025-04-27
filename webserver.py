@@ -1034,7 +1034,8 @@ async def update_position(request):
             'required_roles': settings.get('required_roles', []),
             'accepted_removal_roles': settings.get('accepted_removal_roles', []),
             'denied_removal_roles': settings.get('denied_removal_roles', []),
-            'auto_thread': settings.get('auto_thread', False)
+            'auto_thread': settings.get('auto_thread', False),
+            'time_limit': settings.get('time_limit', 60)
         })
         
         # Save changes
