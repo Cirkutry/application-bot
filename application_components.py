@@ -847,16 +847,44 @@ class ApplicationResponseView(View):
         # Get user's roles
         user_roles = [str(role.id) for role in interaction.user.roles]
         
-        # Check if user has any of the button management roles for this position
+        # Administrator always has permissions
+        if interaction.user.guild_permissions.administrator:
+            return True
+            
+        # Determine which button was clicked based on the custom_id
+        custom_id = interaction.data.get('custom_id', '')
+        button_type = ''
+        
+        if custom_id.startswith('app_accept_simple'):
+            button_type = 'accept'
+            required_roles = position_settings.get('accept_roles', [])
+        elif custom_id.startswith('app_reject_simple'):
+            button_type = 'reject'
+            required_roles = position_settings.get('reject_roles', [])
+        elif custom_id.startswith('app_accept_reason'):
+            button_type = 'accept_reason'
+            required_roles = position_settings.get('accept_reason_roles', [])
+        elif custom_id.startswith('app_reject_reason'):
+            button_type = 'reject_reason'
+            required_roles = position_settings.get('reject_reason_roles', [])
+        else:
+            # If we can't determine button type, fall back to the general button_roles
+            button_type = 'unknown'
+            required_roles = position_settings.get('button_roles', [])
+        
+        # Check if user has any of the required roles for this button type
+        has_required_role = any(role_id in user_roles for role_id in required_roles)
+        
+        # Check the general button_roles
         has_button_role = any(role_id in user_roles for role_id in position_settings.get('button_roles', []))
         
-        # Allow interaction if user has button role or is administrator
-        if interaction.user.guild_permissions.administrator or has_button_role:
+        # Allow interaction if user has either specific role for this button or a general button role
+        if has_required_role or has_button_role:
             return True
             
         # Send ephemeral error message if user doesn't have permissions
         await interaction.response.send_message(
-            "You don't have permission to use these buttons. Only administrators and users with the specified button management roles can use them.",
+            f"You don't have permission to use the {button_type.replace('_', ' ').title()} button. Only administrators and users with the specified roles can use this button.",
             ephemeral=True
         )
         return False

@@ -93,6 +93,46 @@
                 </select>
             </div>
             <div class="form-group">
+                <label for="acceptRoles">Accept Button Roles</label>
+                <select class="form-control" id="acceptRoles" multiple>
+                    {% for role in roles %}
+                    <option value="{{ role.id }}" {% if role.id in settings.accept_roles %}selected{% endif %}>
+                        @{{ role.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="rejectRoles">Reject Button Roles</label>
+                <select class="form-control" id="rejectRoles" multiple>
+                    {% for role in roles %}
+                    <option value="{{ role.id }}" {% if role.id in settings.reject_roles %}selected{% endif %}>
+                        @{{ role.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="acceptReasonRoles">Accept with Reason Button Roles</label>
+                <select class="form-control" id="acceptReasonRoles" multiple>
+                    {% for role in roles %}
+                    <option value="{{ role.id }}" {% if role.id in settings.accept_reason_roles %}selected{% endif %}>
+                        @{{ role.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="rejectReasonRoles">Reject with Reason Button Roles</label>
+                <select class="form-control" id="rejectReasonRoles" multiple>
+                    {% for role in roles %}
+                    <option value="{{ role.id }}" {% if role.id in settings.reject_reason_roles %}selected{% endif %}>
+                        @{{ role.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="acceptedRoles">Accepted Roles</label>
                 <select class="form-control" id="acceptedRoles" multiple>
                     {% for role in roles %}
