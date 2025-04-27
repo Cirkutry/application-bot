@@ -415,7 +415,7 @@ async def applications(request):
     # Get query parameters
     status = request.query.get('status')
     position = request.query.get('position')
-    sort = request.query.get('sort', 'newest')
+    sort = request.query.get('sort')
     page = int(request.query.get('page', 1))
     per_page = 10  # Number of applications per page
     
@@ -435,6 +435,9 @@ async def applications(request):
         all_applications.sort(key=lambda app: app.get('id', ''), reverse=True)
     elif sort == 'oldest':
         all_applications.sort(key=lambda app: app.get('id', ''))
+    else:
+        # Default sort by newest if no sort is specified
+        all_applications.sort(key=lambda app: app.get('id', ''), reverse=True)
     
     # Get total number of pages
     total_applications = len(all_applications)
@@ -493,13 +496,19 @@ async def applications(request):
         'page': page,
         'positions': positions,
         'is_admin': is_admin,
-        'status': status,
-        'position': position,
-        'sort': sort,
         'has_viewer_role': has_viewer_role,
         'server': server_info,
         'user': user_info  # Pass the full user info object for the template
     }
+    
+    # Only add filter parameters if they were explicitly provided
+    if status:
+        context['status'] = status
+    if position:
+        context['position'] = position
+    if sort:
+        context['sort'] = sort
+    
     return aiohttp_jinja2.render_template('applications.html', request, context)
 
 @routes.get('/positions')

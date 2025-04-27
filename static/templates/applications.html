@@ -12,13 +12,11 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="/applications">None</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><h6 class="dropdown-header">Status</h6></li>
+                <li><h6 class="dropdown-header">By status</h6></li>
                 <li><a class="dropdown-item" href="?status=pending">Pending</a></li>
                 <li><a class="dropdown-item" href="?status=approved">Approved</a></li>
                 <li><a class="dropdown-item" href="?status=reject">Rejected</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><h6 class="dropdown-header">Position</h6></li>
+                <li><h6 class="dropdown-header">By position</h6></li>
                 {% for position in positions %}
                 <li><a class="dropdown-item" href="?position={{ position }}">{{ position }}</a></li>
                 {% endfor %}
@@ -97,15 +95,15 @@
         <nav>
             <ul class="pagination justify-content-center mb-0">
                 <li class="page-item {% if page == 1 %}disabled{% endif %}">
-                    <a class="page-link" href="?page={{ page - 1 }}{% if status %}&status={{ status }}{% endif %}{% if position %}&position={{ position }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">Previous</a>
+                    <a class="page-link" href="?page={{ page - 1 }}{% if 'status' in request.query %}&status={{ status }}{% endif %}{% if 'position' in request.query %}&position={{ position }}{% endif %}{% if 'sort' in request.query %}&sort={{ sort }}{% endif %}">Previous</a>
                 </li>
                 {% for p in range(1, total_pages + 1) %}
                 <li class="page-item {% if p == page %}active{% endif %}">
-                    <a class="page-link" href="?page={{ p }}{% if status %}&status={{ status }}{% endif %}{% if position %}&position={{ position }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">{{ p }}</a>
+                    <a class="page-link" href="?page={{ p }}{% if 'status' in request.query %}&status={{ status }}{% endif %}{% if 'position' in request.query %}&position={{ position }}{% endif %}{% if 'sort' in request.query %}&sort={{ sort }}{% endif %}">{{ p }}</a>
                 </li>
                 {% endfor %}
-                <li class="page-item {% if page == total_pages %}disabled{% endif %}">
-                    <a class="page-link" href="?page={{ page + 1 }}{% if status %}&status={{ status }}{% endif %}{% if position %}&position={{ position }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">Next</a>
+                <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                    <a class="page-link" href="?page={{ page + 1 }}{% if 'status' in request.query %}&status={{ status }}{% endif %}{% if 'position' in request.query %}&position={{ position }}{% endif %}{% if 'sort' in request.query %}&sort={{ sort }}{% endif %}">Next</a>
                 </li>
             </ul>
         </nav>

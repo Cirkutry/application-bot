@@ -453,6 +453,16 @@ textarea.form-control {
     border-color: var(--primary-color);
 }
 
+.page-item.disabled {
+    cursor: not-allowed !important;
+}
+
+.disabled > .page-link, .page-link.disabled {
+    color: var(--text);
+	background-color: gray;
+    border-color: gray;
+}
+
 /* Dropdowns */
 .dropdown-menu {
     background-color: var(--bg-card);
@@ -472,6 +482,7 @@ textarea.form-control {
     color: var(--text);
     font-weight: 600;
     padding: 0.5rem 1rem;
+    background-color: gray;
 }
 
 .dropdown-divider {
