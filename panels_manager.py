@@ -5,9 +5,7 @@ import pathlib
 from dotenv import load_dotenv
 import uuid
 import logging
-from application_components import StaffApplicationView
 import traceback
-from panel_utils import load_panels, save_panels
 
 # Get logger
 logger = logging.getLogger(__name__)
@@ -48,6 +46,8 @@ def save_panels(panels):
         return False
 
 async def register_panels(bot):
+    from application_components import StaffApplicationView
+    
     panels = load_panels()
     
     # Clear existing views to prevent duplicates
@@ -99,6 +99,8 @@ async def register_panels(bot):
     return registered_count
 
 async def create_panel(bot, channel_id, positions, embed_data):
+    from application_components import StaffApplicationView
+    
     try:
         # Create the embed
         embed = discord.Embed(

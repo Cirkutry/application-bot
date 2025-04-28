@@ -10,7 +10,7 @@ import uuid
 import traceback
 import pathlib
 import logging
-from panel_utils import load_panels
+from panels_manager import load_panels
 
 # Get logger
 logger = logging.getLogger(__name__)
@@ -67,6 +67,9 @@ async def handle_dm_message(bot, message):
 
     application = bot.active_applications.get(str(message.author.id))
     if not application:
+        return
+        
+    if 'start_time' not in application:
         return
         
     # Check if the application has a start_time and if the time limit has passed
@@ -215,12 +218,34 @@ class StaffApplicationSelect(Select):
             # Get the selected position
             position = self.values[0]
             
+            # Check if position is disabled
+            questions_data = load_questions()
+            position_settings = questions_data.get(position, {})
+            if not position_settings.get('enabled', True):
+                await interaction.response.send_message(
+                    f"This position is currently not taking applicants. Please try again later.",
+                    ephemeral=True
+                )
+                # Refresh the select menu for other users
+                await self.refresh_select_menu(interaction)
+                return
+            
             # Check if user already has an active application
             if hasattr(self.view.bot, 'active_applications'):
                 active_app = self.view.bot.active_applications.get(str(interaction.user.id))
                 if active_app:
                     # If the position and panel match, resume the application process
                     if active_app['position'] == position and active_app['panel_id'] == self.panel_id:
+                        # Check if application has been started
+                        if 'start_time' not in active_app:
+                            await interaction.response.send_message(
+                                f"You have an active application but haven't started it yet. Please check your DMs to start or cancel the application.",
+                                ephemeral=True
+                            )
+                            # Refresh the select menu for other users
+                            await self.refresh_select_menu(interaction)
+                            return
+                            
                         # Calculate which question to send next
                         current_question = active_app['current_question']
                         questions = active_app['questions']
@@ -236,36 +261,43 @@ class StaffApplicationSelect(Select):
                             # If there are still questions to answer
                             if current_question < len(questions):
                                 # Send the current question via DM
-                                await dm.send(f"**Continuing your application...**\n**Question {current_question + 1} of {len(questions)}:**\n{questions[current_question]}")
+                                await dm.send(f"**Continuing your application...**\n**Question {current_question + 1} of {len(questions)}:** {questions[current_question]}")
                                 
                                 # Send followup message
-                                await interaction.followup.send("I've sent you a DM to continue your application!", ephemeral=True)
+                                await interaction.followup.send(f"I've sent you a DM to continue your application!", ephemeral=True)
                             else:
                                 # All questions answered, send a message to continue in DMs
-                                await interaction.followup.send("You have already answered all questions. Please continue in your DMs with the bot.", ephemeral=True)
+                                await interaction.followup.send(f"You have already answered all questions. Please continue in your DMs with the bot.", ephemeral=True)
                             
                             # Refresh the select menu for other users
                             await self.refresh_select_menu(interaction)
                             return
                         except Exception as e:
                             logger.error(f"Error sending DM: {e}")
-                            await interaction.followup.send("Failed to send you a DM. Please make sure your DMs are open and try again.", ephemeral=True)
+                            await interaction.followup.send("Failed to send you a DM to start the application! Please check your Privacy settings for this server and make sure Direct Messages are enabled and try again.", ephemeral=True)
                             # Refresh the select menu for other users
                             await self.refresh_select_menu(interaction)
                             return
                     elif active_app['position'] == position:
                         await interaction.response.send_message(
-                            "You already have an active application for this position. Please complete it or wait for it to be reviewed.",
+                            f"You have an active application but haven't started it yet. Please check your DMs to start or cancel the application.",
                             ephemeral=True
                         )
                         # Refresh the select menu for other users
                         await self.refresh_select_menu(interaction)
                         return
                     else:
-                        await interaction.response.send_message(
-                            "You already have an active application for a different position. Please complete it or wait for it to be reviewed.",
-                            ephemeral=True
-                        )
+                        # Check if application has been started
+                        if 'start_time' not in active_app:
+                            await interaction.response.send_message(
+                                f"You have an active application for a different position but haven't started it yet. Please check your DMs to start or cancel the application.",
+                                ephemeral=True
+                            )
+                        else:
+                            await interaction.response.send_message(
+                                f"You already have an active application for a different position. Please complete it or wait for it to be reviewed.",
+                                ephemeral=True
+                            )
                         # Refresh the select menu for other users
                         await self.refresh_select_menu(interaction)
                         return
@@ -333,7 +365,11 @@ class StaffApplicationSelect(Select):
                 
                 # Send welcome message with Start and Cancel buttons
                 welcome_view = ApplicationStartView(self.view.bot, application_data)
-                await dm.send(welcome_message.format(position=position), view=welcome_view)
+                welcome_message = await dm.send(welcome_message.format(position=position), view=welcome_view)
+                
+                if str(interaction.user.id) in self.view.bot.active_applications:
+                    self.view.bot.active_applications[str(interaction.user.id)]['message_id'] = str(welcome_message.id)
+                    save_active_applications(self.view.bot.active_applications)
                 
                 # Make sure questions are loaded properly
                 if not application_data['questions'] or len(application_data['questions']) == 0:
@@ -353,7 +389,7 @@ class StaffApplicationSelect(Select):
                 dm_success = True
                 
                 # Send followup message
-                await interaction.followup.send("I've sent you a DM with the application questions! You have 10 minutes to start or cancel the application.", ephemeral=True)
+                await interaction.followup.send(f"I've sent you a DM with the application questions! Please check your DMs to start or cancel the application.", ephemeral=True)
                 
                 # Refresh the select menu for other users
                 await self.refresh_select_menu(interaction)
@@ -371,7 +407,7 @@ class StaffApplicationSelect(Select):
                     
                 # Only show error message if success message wasn't shown
                 if not dm_success:
-                    await interaction.followup.send("Failed to send you a DM with questions. Please make sure your DMs are open and try again.", ephemeral=True)
+                    await interaction.followup.send(f"Failed to send you a DM to start the application! Please check your Privacy settings for this server and make sure Direct Messages are enabled and try again.", ephemeral=True)
                 
                 # Remove the application since it encountered an error
                 if str(interaction.user.id) in self.view.bot.active_applications:
@@ -902,14 +938,18 @@ class ApplicationResponseView(View):
         await interaction.response.send_message("An error occurred while processing your request. Please try again later.", ephemeral=True)
 
 class ApplicationStartButton(Button):
-    def __init__(self, action: str):
+    def __init__(self, action: str, user_id: str, position: str):
+        custom_id = f"app_welcome_{action}_{user_id}_{position}"
+        
         style = discord.ButtonStyle.success if action == 'start' else discord.ButtonStyle.danger
         super().__init__(
             label="Start Application" if action == 'start' else "Cancel Application",
             style=style,
-            custom_id=f"app_welcome_{action}"
+            custom_id=custom_id
         )
         self.action = action
+        self.user_id = user_id
+        self.position = position
 
     async def callback(self, interaction: discord.Interaction):
         # Get the application data from the view
@@ -929,11 +969,10 @@ class ApplicationStartButton(Button):
             # Add a start_time to the application data to track the time limit
             if hasattr(self.view.bot, 'active_applications') and str(interaction.user.id) in self.view.bot.active_applications:
                 self.view.bot.active_applications[str(interaction.user.id)]['start_time'] = datetime.datetime.now(UTC).isoformat()
+                self.view.bot.active_applications[str(interaction.user.id)]['message_id'] = str(interaction.message.id)
                 save_active_applications(self.view.bot.active_applications)
             
             # Send the first question to the DM channel
-            # Note: interaction.channel is already the DM channel in this case,
-            # but we're being explicit to make the code clearer
             dm_channel = interaction.channel
             total_questions = len(app_data['questions'])
             await dm_channel.send(f"⏰ **Note:** You have {time_limit} minutes to complete all questions in this application.")
@@ -960,14 +999,18 @@ class ApplicationStartButton(Button):
 
 class ApplicationStartView(View):
     def __init__(self, bot, application_data):
-        # Set timeout to 10 minutes (600 seconds)
-        super().__init__(timeout=600)
+        super().__init__(timeout=None)
         self.bot = bot
         self.application_data = application_data
         
-        # Add start and cancel buttons
-        self.add_item(ApplicationStartButton('start'))
-        self.add_item(ApplicationStartButton('cancel'))
+        # Add a custom_id to the view for persistence
+        self.custom_id = f"app_welcome_view_{application_data['user_id']}_{application_data['position']}"
+        
+        # Add start and cancel buttons with custom_ids
+        self.add_item(ApplicationStartButton('start', application_data['user_id'], application_data['position']))
+        self.add_item(ApplicationStartButton('cancel', application_data['user_id'], application_data['position']))
+        
+        bot.add_view(self)
     
     async def on_timeout(self):
         # Get the DM channel to send expiration message
@@ -985,4 +1028,33 @@ class ApplicationStartView(View):
                     del self.bot.active_applications[str(user_id)]
                     save_active_applications(self.bot.active_applications)
         except Exception as e:
-            logger.error(f"Error sending expiration message: {e}") 
+            logger.error(f"Error sending expiration message: {e}")
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Verify that the interaction is coming from the user who owns this application
+        user_id = str(interaction.user.id)
+        app_user_id = self.application_data.get('user_id', '')
+        
+        if user_id != app_user_id:
+            logger.warning(f"User {user_id} tried to interact with an application belonging to {app_user_id}")
+            await interaction.response.send_message("This application doesn't belong to you.", ephemeral=True)
+            return False
+        
+        return True
+            
+    @classmethod
+    async def restore_view(cls, bot, application_data):
+        # Create the view
+        view = cls(bot, application_data)
+        
+        bot.add_view(view)
+
+        if 'message_id' in application_data:
+            try:
+                message_id = int(application_data['message_id'])
+                bot.add_view(view, message_id=message_id)
+                logger.info(f"Registered view with specific message ID: {message_id}")
+            except Exception as e:
+                logger.error(f"Error registering view with message ID: {e}")
+        
+        return view 

@@ -8,7 +8,7 @@ import pathlib
 import datetime
 import logging
 from question_manager import load_questions
-from application_components import StaffApplicationView, ApplicationResponseView
+from application_components import StaffApplicationView, ApplicationResponseView, ApplicationStartView, StaffApplicationSelect
 import traceback
 
 # Get logger
@@ -29,10 +29,31 @@ class ApplicationBot(discord.Client):
         intents.members = True
         super().__init__(intents=intents)
         self.tree = discord.app_commands.CommandTree(self)
-        self.active_applications = {}
-        self.views = {}  # Add views dictionary to store persistent views
+        self.active_applications = load_active_applications()
+        self.views = {}
 
     async def setup_hook(self):
+        # Restore any active views
+        for user_id, app_data in self.active_applications.items():
+            if 'start_time' not in app_data:  # Only restore views for applications that haven't started
+                try:
+                    logger.info(f"Attempting to restore view for user {user_id}")
+                    
+                    has_message_id = 'message_id' in app_data
+                    
+                    # Restore the view
+                    view = await ApplicationStartView.restore_view(self, app_data)
+                    self.views[user_id] = view
+                    
+                    logger.info(f"Successfully restored view for user {user_id}")
+                except Exception as e:
+                    logger.error(f"Error restoring view for user {user_id}: {e}")
+                    logger.error(f"Error traceback: {traceback.format_exc()}")
+        
+        # Add other views
+        self.add_view(StaffApplicationSelect(self, []))
+        self.add_view(ApplicationResponseView("", ""))
+        
         # Add the application panel handler
         self.add_listener(handle_dm_message, 'on_message')
         
@@ -77,19 +98,13 @@ class ApplicationBot(discord.Client):
             # Set processing flag
             app_data['processing'] = True
             logger.info(f"Processing message from {message.author.name}: {message.content}")
-            logger.debug(f"Current application state: {app_data}")
             
             try:
                 # Get the current question index
                 current_q_index = app_data['current_question']
-                logger.debug(f"Current question index: {current_q_index}")
-                logger.debug(f"Total questions: {len(app_data['questions'])}")
-                logger.debug(f"Questions array: {app_data['questions']}")
                 
                 # Add the answer
                 app_data['answers'].append(message.content)
-                logger.debug(f"Added answer: {message.content}")
-                logger.debug(f"Updated answers array: {app_data['answers']}")
                 
                 # Check if we have all answers
                 if len(app_data['answers']) >= len(app_data['questions']):
@@ -99,16 +114,13 @@ class ApplicationBot(discord.Client):
                     # Update current question index and send next question
                     app_data['current_question'] = current_q_index + 1
                     next_q_index = app_data['current_question']
-                    logger.debug(f"Sending next question: {next_q_index}")
                     
                     if next_q_index < len(app_data['questions']):
                         next_question = app_data['questions'][next_q_index]
-                        logger.debug(f"Next question content: {next_question}")
                         
                         # Add a delay to ensure messages are processed in order
                         await asyncio.sleep(1)
                         try:
-                            logger.debug(f"Attempting to send question: {next_question}")
                             await message.channel.send(f"**Question {next_q_index + 1}:** {next_question}")
                             logger.info(f"Successfully sent question {next_q_index + 1}")
                         except Exception as e:
@@ -134,7 +146,6 @@ class ApplicationBot(discord.Client):
                 # Clear processing flag
                 if str(message.author.id) in self.active_applications:
                     self.active_applications[str(message.author.id)]['processing'] = False
-                    logger.debug(f"Cleared processing flag for {message.author.name}")
                 logger.info(f"Finished processing message from {message.author.name}")
             
             return

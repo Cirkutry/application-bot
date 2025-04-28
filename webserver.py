@@ -17,7 +17,6 @@ from application_components import StaffApplicationView
 import math
 import uuid
 import logging
-from panel_utils import load_panels, save_panels
 
 # Load environment variables
 load_dotenv()

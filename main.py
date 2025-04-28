@@ -154,6 +154,69 @@ async def main():
     
     bot = commands.Bot(command_prefix='!', intents=intents)
     
+    # Register global handlers for persistent views
+    from application_components import ApplicationStartButton
+    
+    # This ensures that any ApplicationStartButton with a matching custom_id pattern will be handled
+    @bot.listen('on_interaction')
+    async def handle_global_app_buttons(interaction):
+        try:
+            # Skip non-component interactions
+            if not interaction.type == discord.InteractionType.component:
+                return
+                
+            custom_id = interaction.data.get('custom_id', '')
+            
+            # Check if this is a start or cancel application button from DMs
+            if custom_id.startswith('app_welcome_') and isinstance(interaction.channel, discord.DMChannel):
+                # Extract the action, user_id, and position from the custom_id
+                parts = custom_id.split('_')
+                if len(parts) >= 4:
+                    action = parts[2]
+                    user_id = parts[3]
+                    position = '_'.join(parts[4:])
+                    
+                    # Check if user has an active application
+                    if not hasattr(bot, 'active_applications'):
+                        from application_components import load_active_applications
+                        bot.active_applications = load_active_applications()
+                        
+                    if user_id in bot.active_applications:
+                        from application_components import ApplicationStartButton, ApplicationStartView
+                        # Create a new application view first
+                        view = ApplicationStartView(bot, bot.active_applications[user_id])
+                        
+                        if action == 'start' and len(view.children) > 0:
+                            # Get the start button from the view
+                            start_button = view.children[0]  # First child is the start button
+                            # Ensure it's the correct button type
+                            if isinstance(start_button, ApplicationStartButton) and start_button.action == 'start':
+                                await start_button.callback(interaction)
+                            else:
+                                await interaction.response.send_message("Error processing your request. Please try starting a new application.", ephemeral=True)
+                        elif action == 'cancel' and len(view.children) > 1:
+                            # Get the cancel button from the view
+                            cancel_button = view.children[1]  # Second child is the cancel button
+                            # Ensure it's the correct button type
+                            if isinstance(cancel_button, ApplicationStartButton) and cancel_button.action == 'cancel':
+                                await cancel_button.callback(interaction)
+                            else:
+                                await interaction.response.send_message("Error processing your request. Please try starting a new application.", ephemeral=True)
+                        else:
+                            await interaction.response.send_message("Error processing your request. Please try starting a new application.", ephemeral=True)
+                    else:
+                        await interaction.response.send_message("Your application session has expired or was not found. Please start a new application.", ephemeral=True)
+        except discord.errors.NotFound:
+            # This can happen if the interaction token is expired
+            pass
+        except Exception as e:
+            # Try to respond to the interaction if possible
+            try:
+                if not interaction.response.is_done():
+                    await interaction.response.send_message("An error occurred while processing your request. Please try again or start a new application.", ephemeral=True)
+            except Exception:
+                pass  # Ignore if we can't respond to the interaction
+    
     @bot.event
     async def on_message(message):
         # Process commands first
