@@ -108,33 +108,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const colorInput = document.getElementById('embedColor');
     const colorPicker = document.getElementById('embedColorPicker');
 
-    // Update color picker when hex input changes
-    colorInput.addEventListener('input', function(e) {
-        const value = e.target.value;
-        if (/^#[0-9A-F]{6}$/i.test(value)) {
-            colorPicker.value = value;
-        }
-    });
+    if (colorInput && colorPicker) {
+        // Update color picker when hex input changes
+        colorInput.addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (/^#[0-9A-F]{6}$/i.test(value)) {
+                colorPicker.value = value;
+            }
+        });
 
-    // Update hex input when color picker changes
-    colorPicker.addEventListener('input', function(e) {
-        colorInput.value = e.target.value;
-    });
+        // Update hex input when color picker changes
+        colorPicker.addEventListener('input', function(e) {
+            colorInput.value = e.target.value;
+        });
 
-    // Validate hex color on blur
-    colorInput.addEventListener('blur', function(e) {
-        const value = e.target.value;
-        if (!/^#[0-9A-F]{6}$/i.test(value)) {
-            e.target.value = '#5865F2';
-            colorPicker.value = '#5865F2';
-        }
-    });
-});
+        // Validate hex color on blur
+        colorInput.addEventListener('blur', function(e) {
+            const value = e.target.value;
+            if (!/^#[0-9A-F]{6}$/i.test(value)) {
+                e.target.value = '#5865F2';
+                colorPicker.value = '#5865F2';
+            }
+        });
+    }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
     handleUrlParams();
     
     // Initialize Select2 for all select elements
     initializeSelect2('select');
+
+    initializeSidebar();
 });

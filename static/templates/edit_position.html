@@ -21,23 +21,25 @@
                     <input class="form-check-input" type="checkbox" id="positionEnabled" {% if settings.enabled %}checked{% endif %}>
                     <label class="form-check-label" for="positionEnabled">Enable Position</label>
                 </div>
+                <small><i class="fa-regular fa-circle-question"></i> When enabled, applicants will be able to apply for this position.</small>
             </div>
             <div class="form-group">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="autoThread" {% if settings.auto_thread %}checked{% endif %}>
                     <label class="form-check-label" for="autoThread">Auto Thread</label>
-                    <small class="form-text text-muted">When enabled, a thread will be automatically created for each new application.</small>
                 </div>
+                <small><i class="fa-regular fa-circle-question"></i> When enabled, a thread will be automatically created for each new application.</small>
             </div>
             <div class="form-group">
                 <label for="timeLimit">Time Limit (minutes)</label>
                 <input type="number" class="form-control" id="timeLimit" min="1" max="1440" value="{{ settings.time_limit|default(60) }}">
-                <small class="form-text text-muted">Maximum time allowed for applicants to complete all questions.</small>
+                <small><i class="fa-regular fa-circle-question"></i> Maximum time allowed for applicants to complete all questions.</small>
             </div>
             <div class="form-group">
                 <label for="logChannel">Log Channel ID</label>
                 <input type="text" class="form-control" id="logChannel" value="{{ settings.log_channel }}">
             </div>
+            <small><i class="fa-regular fa-circle-question"></i> The channel where this application's logs will be sent.</small>
         </div>
 
         <div class="form-section">
@@ -45,18 +47,22 @@
             <div class="form-group">
                 <label for="welcomeMessage">Welcome Message</label>
                 <textarea id="welcomeMessage" class="form-control" rows="3">{{ settings.welcome_message }}</textarea>
+                <small><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when they start the application.</small>
             </div>
             <div class="form-group">
                 <label for="completionMessage">Completion Message</label>
                 <textarea id="completionMessage" class="form-control" rows="3">{{ settings.completion_message }}</textarea>
+                <small><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when they complete the application.</small>
             </div>
             <div class="form-group">
                 <label for="acceptedMessage">Accepted Message</label>
                 <textarea id="acceptedMessage" class="form-control" rows="3">{{ settings.accepted_message }}</textarea>
+                <small><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when their application is accepted.</small>
             </div>
             <div class="form-group">
                 <label for="deniedMessage">Denied Message</label>
                 <textarea id="deniedMessage" class="form-control" rows="3">{{ settings.denied_message }}</textarea>
+                <small><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when their application is denied.</small>
             </div>
         </div>
 
@@ -74,7 +80,6 @@
                         <div class="accordion-body">
                             <div class="form-group">
                                 <label for="restrictedRoles">Restricted Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will not be able to apply for this position.</small>
                                 <select class="form-control" id="restrictedRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.restricted_roles %}selected{% endif %}>
@@ -82,10 +87,10 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will not be able to apply for this position.</small>
                             </div>
                             <div class="form-group">
                                 <label for="requiredRoles">Required Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that are required to apply for this position.</small>
                                 <select class="form-control" id="requiredRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.required_roles %}selected{% endif %}>
@@ -93,6 +98,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that are required to apply for this position.</small>
                             </div>
                         </div>
                     </div>
@@ -109,7 +115,6 @@
                         <div class="accordion-body">
                             <div class="form-group">
                                 <label for="buttonRoles">Button Management Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to all buttons in the log embed.</small>
                                 <select class="form-control" id="buttonRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.button_roles %}selected{% endif %}>
@@ -117,10 +122,10 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use all the buttons in the log embed.</small>
                             </div>
                             <div class="form-group">
                                 <label for="acceptRoles">Accept Button Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use the accept button.</small>
                                 <select class="form-control" id="acceptRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.accept_roles %}selected{% endif %}>
@@ -128,10 +133,10 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the accept button.</small>
                             </div>
                             <div class="form-group">
                                 <label for="rejectRoles">Reject Button Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use the reject button.</small>
                                 <select class="form-control" id="rejectRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.reject_roles %}selected{% endif %}>
@@ -139,10 +144,10 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the reject button.</small>
                             </div>
                             <div class="form-group">
                                 <label for="acceptReasonRoles">Accept with Reason Button Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use the accept with reason button.</small>
                                 <select class="form-control" id="acceptReasonRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.accept_reason_roles %}selected{% endif %}>
@@ -150,10 +155,10 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the accept with reason button.</small>
                             </div>
                             <div class="form-group">
                                 <label for="rejectReasonRoles">Reject with Reason Button Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use the reject with reason button.</small>
                                 <select class="form-control" id="rejectReasonRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.reject_reason_roles %}selected{% endif %}>
@@ -161,6 +166,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the reject with reason button.</small>
                             </div>
                         </div>
                     </div>
@@ -177,7 +183,6 @@
                         <div class="accordion-body">
                             <div class="form-group">
                                 <label for="acceptedRoles">Accepted Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be added to users when their application is accepted.</small>
                                 <select class="form-control" id="acceptedRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.accepted_roles %}selected{% endif %}>
@@ -185,10 +190,10 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be added to user when their application is accepted.</small>
                             </div>
                             <div class="form-group">
                                 <label for="deniedRoles">Denied Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be added to users when their application is denied.</small>
                                 <select class="form-control" id="deniedRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.denied_roles %}selected{% endif %}>
@@ -196,10 +201,10 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be added to user when their application is denied.</small>
                             </div>
                             <div class="form-group">
                                 <label for="acceptedRemovalRoles">Accepted Removal Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be removed from users when their application is accepted.</small>
                                 <select class="form-control" id="acceptedRemovalRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.accepted_removal_roles %}selected{% endif %}>
@@ -207,10 +212,10 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be removed from user when their application is accepted.</small>
                             </div>
                             <div class="form-group">
                                 <label for="deniedRemovalRoles">Denied Removal Roles</label>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be removed from users when their application is denied.</small>
                                 <select class="form-control" id="deniedRemovalRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.denied_removal_roles %}selected{% endif %}>
@@ -218,6 +223,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be removed from user when their application is denied.</small>
                             </div>
                         </div>
                     </div>
@@ -233,7 +239,6 @@
                     <div id="otherRolesCollapse" class="accordion-collapse collapse" aria-labelledby="otherRolesHeading" data-bs-parent="#roleSettingsAccordion">
                         <div class="accordion-body">
                             <div class="form-group">
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be pinged when an application log embed is sent.</small>
                                 <select class="form-control" id="pingRoles" multiple>
                                     {% for role in roles %}
                                     <option value="{{ role.id }}" {% if role.id in settings.ping_roles %}selected{% endif %}>
@@ -241,6 +246,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be pinged when an application log embed is sent.</small>
                             </div>
                         </div>
                     </div>

@@ -136,7 +136,7 @@ function saveViewerRoles() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+function initializeSidebar() {
     const hamburger = document.querySelector('.hamburger-menu');
     const sidebar = document.querySelector('.sidebar');
     
@@ -145,4 +145,8 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebar.classList.toggle('active');
         });
     }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSidebar();
 });
