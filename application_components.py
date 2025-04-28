@@ -26,6 +26,18 @@ APPS_DIRECTORY = 'storage/applications'
 pathlib.Path(APPS_DIRECTORY).mkdir(exist_ok=True)
 ACTIVE_APPS_FILE = os.path.join('storage', 'active_applications.json')
 
+# Function to generate a DM link with the bot
+async def get_dm_link(bot, user):
+    try:
+        # Create or get DM channel with user
+        dm_channel = await user.create_dm()
+        if dm_channel:
+            return f"https://discord.com/channels/@me/{dm_channel.id}"
+    except Exception as e:
+        logger.error(f"Error creating DM link: {e}")
+    
+    return "https://discord.com/app"
+
 # Function to load active applications from file
 def load_active_applications():
     if not os.path.exists(ACTIVE_APPS_FILE):
@@ -238,8 +250,10 @@ class StaffApplicationSelect(Select):
                     if active_app['position'] == position and active_app['panel_id'] == self.panel_id:
                         # Check if application has been started
                         if 'start_time' not in active_app:
+                            # Get DM link
+                            dm_link = await get_dm_link(self.view.bot, interaction.user)
                             await interaction.response.send_message(
-                                f"You have an active application but haven't started it yet. Please check your DMs to start or cancel the application.",
+                                f"You have an active application but haven't started it yet. Please check your DMs to start or cancel the application.\n[Click here to open your DMs]({dm_link})",
                                 ephemeral=True
                             )
                             # Refresh the select menu for other users
@@ -263,11 +277,17 @@ class StaffApplicationSelect(Select):
                                 # Send the current question via DM
                                 await dm.send(f"**Continuing your application...**\n**Question {current_question + 1} of {len(questions)}:** {questions[current_question]}")
                                 
+                                # Get DM link
+                                dm_link = await get_dm_link(self.view.bot, interaction.user)
+                                
                                 # Send followup message
-                                await interaction.followup.send(f"I've sent you a DM to continue your application!", ephemeral=True)
+                                await interaction.followup.send(f"I've sent you a DM to continue your application!\n[Click here to open your DMs]({dm_link})", ephemeral=True)
                             else:
+                                # Get DM link
+                                dm_link = await get_dm_link(self.view.bot, interaction.user)
+                                
                                 # All questions answered, send a message to continue in DMs
-                                await interaction.followup.send(f"You have already answered all questions. Please continue in your DMs with the bot.", ephemeral=True)
+                                await interaction.followup.send(f"You have already answered all questions. Please continue in your DMs with the bot.\n[Click here to open your DMs]({dm_link})", ephemeral=True)
                             
                             # Refresh the select menu for other users
                             await self.refresh_select_menu(interaction)
@@ -279,8 +299,10 @@ class StaffApplicationSelect(Select):
                             await self.refresh_select_menu(interaction)
                             return
                     elif active_app['position'] == position:
+                        # Get DM link
+                        dm_link = await get_dm_link(self.view.bot, interaction.user)
                         await interaction.response.send_message(
-                            f"You have an active application but haven't started it yet. Please check your DMs to start or cancel the application.",
+                            f"You have an active application but haven't started it yet. Please check your DMs to start or cancel the application.\n[Click here to open your DMs]({dm_link})",
                             ephemeral=True
                         )
                         # Refresh the select menu for other users
@@ -289,13 +311,17 @@ class StaffApplicationSelect(Select):
                     else:
                         # Check if application has been started
                         if 'start_time' not in active_app:
+                            # Get DM link
+                            dm_link = await get_dm_link(self.view.bot, interaction.user)
                             await interaction.response.send_message(
-                                f"You have an active application for a different position but haven't started it yet. Please check your DMs to start or cancel the application.",
+                                f"You have an active application for a different position but haven't started it yet. Please check your DMs to start or cancel the application.\n[Click here to open your DMs]({dm_link})",
                                 ephemeral=True
                             )
                         else:
+                            # Get DM link
+                            dm_link = await get_dm_link(self.view.bot, interaction.user)
                             await interaction.response.send_message(
-                                f"You already have an active application for a different position. Please complete it or wait for it to be reviewed.",
+                                f"You already have an active application for a different position. Please complete it or wait for it to be reviewed.\n[Click here to open your DMs]({dm_link})",
                                 ephemeral=True
                             )
                         # Refresh the select menu for other users
@@ -388,8 +414,11 @@ class StaffApplicationSelect(Select):
                 # Set success flag
                 dm_success = True
                 
+                # Get DM link
+                dm_link = await get_dm_link(self.view.bot, interaction.user)
+                
                 # Send followup message
-                await interaction.followup.send(f"I've sent you a DM with the application questions! Please check your DMs to start or cancel the application.", ephemeral=True)
+                await interaction.followup.send(f"I've sent you a DM with the application questions! Please check your DMs to start or cancel the application.\n[Click here to open your DMs]({dm_link})", ephemeral=True)
                 
                 # Refresh the select menu for other users
                 await self.refresh_select_menu(interaction)
