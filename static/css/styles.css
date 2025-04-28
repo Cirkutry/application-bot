@@ -17,12 +17,19 @@
     padding: 0;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
 body {
     font-family: 'Josefin Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: var(--text);
     background-color: var(--background);
-    min-height: 100vh;
+    position: relative;
 }
 
 /* Layout */
@@ -31,7 +38,7 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100vh;
+    height: 100%;
     background-color: var(--bg-card);
     padding: 1rem;
     z-index: 1000;
@@ -43,6 +50,10 @@ body {
     margin-left: var(--sidebar-width);
     padding: 2rem;
 }
+
+.small, small {
+    color: var(--text);
+  }
 
 /* Navigation */
 .nav-link {
@@ -297,19 +308,6 @@ textarea.form-control {
 /* Text Colors */
 .text {
     color: var(--text) !important;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-    }
-    
-    .main-content {
-        margin-left: 0;
-    }
 }
 
 /* Application Details */
@@ -594,12 +592,10 @@ h6 {
 }
 
 .panel-creator .form-section {
-    margin-bottom: 30px;
     padding: 0 8px;
 }
 
 .panel-creator .form-section h3 {
-    margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 1px solid white;
     color: var(--text);
@@ -926,6 +922,7 @@ h6 {
     border-radius: 4px;
     font-size: 0.8em;
     font-weight: 500;
+    white-space: nowrap;
 }
 
 .status-enabled {
@@ -946,6 +943,7 @@ h6 {
 .position-actions {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .position-stats {
@@ -964,7 +962,6 @@ h6 {
 .form-section {
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid var(--border);
 }
 
 .form-section:last-child {
@@ -1120,4 +1117,91 @@ h6 {
 .sidebar-footer a {
     color: var(--text-secondary);
     transition: color 0.2s ease;
+}
+
+.accordion-button {
+    background-color: var(--bg-card);
+    color: var(--text);
+}
+
+.accordion {
+    --bs-accordion-bg: var(--bg-card);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--background);
+    color: var(--text);
+}
+
+.accordion-button:after {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !important;
+  }
+
+  @media (max-width: 768px) {
+    html, body {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    body {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+    }
+
+    .hamburger-menu {
+        display: flex !important;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        position: fixed;
+        width: var(--sidebar-width);
+        height: 100%;
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding-top: 1rem;
+        height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .position-actions {
+        gap: 4px;
+    }
+    
+    .position-actions .btn {
+        padding: 6px 12px;
+        font-size: 0.9em;
+    }
+}
+
+.hamburger-menu {
+    display: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 1001;
+}
+
+.hamburger-menu:hover {
+    color: var(--primary-color);
 }

@@ -62,125 +62,189 @@
 
         <div class="form-section">
             <h3>Role Settings</h3>
-            <div class="form-group">
-                <label for="restrictedRoles">Restricted Roles</label>
-                <select class="form-control" id="restrictedRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.restricted_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="requiredRoles">Required Roles</label>
-                <select class="form-control" id="requiredRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.required_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="buttonRoles">Button Management Roles</label>
-                <select class="form-control" id="buttonRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.button_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="acceptRoles">Accept Button Roles</label>
-                <select class="form-control" id="acceptRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.accept_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="rejectRoles">Reject Button Roles</label>
-                <select class="form-control" id="rejectRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.reject_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="acceptReasonRoles">Accept with Reason Button Roles</label>
-                <select class="form-control" id="acceptReasonRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.accept_reason_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="rejectReasonRoles">Reject with Reason Button Roles</label>
-                <select class="form-control" id="rejectReasonRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.reject_reason_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="acceptedRoles">Accepted Roles</label>
-                <select class="form-control" id="acceptedRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.accepted_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="deniedRoles">Denied Roles</label>
-                <select class="form-control" id="deniedRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.denied_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="pingRoles">Ping Roles</label>
-                <select class="form-control" id="pingRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.ping_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="acceptedRemovalRoles">Accepted Removal Roles</label>
-                <select class="form-control" id="acceptedRemovalRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.accepted_removal_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="deniedRemovalRoles">Denied Removal Roles</label>
-                <select class="form-control" id="deniedRemovalRoles" multiple>
-                    {% for role in roles %}
-                    <option value="{{ role.id }}" {% if role.id in settings.denied_removal_roles %}selected{% endif %}>
-                        {{ role.name }}
-                    </option>
-                    {% endfor %}
-                </select>
+            <div class="accordion" id="roleSettingsAccordion">
+                <!-- Restricted & Required Roles -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="accessRolesHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accessRolesCollapse" aria-expanded="false" aria-controls="accessRolesCollapse">
+                            Application Access
+                        </button>
+                    </h2>
+                    <div id="accessRolesCollapse" class="accordion-collapse collapse" aria-labelledby="accessRolesHeading" data-bs-parent="#roleSettingsAccordion">
+                        <div class="accordion-body">
+                            <div class="form-group">
+                                <label for="restrictedRoles">Restricted Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will not be able to apply for this position.</small>
+                                <select class="form-control" id="restrictedRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.restricted_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="requiredRoles">Required Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that are required to apply for this position.</small>
+                                <select class="form-control" id="requiredRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.required_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Button Access Roles -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="buttonManagementHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#buttonManagementCollapse" aria-expanded="false" aria-controls="buttonManagementCollapse">
+                            Log Embed Button Access
+                        </button>
+                    </h2>
+                    <div id="buttonManagementCollapse" class="accordion-collapse collapse" aria-labelledby="buttonManagementHeading" data-bs-parent="#roleSettingsAccordion">
+                        <div class="accordion-body">
+                            <div class="form-group">
+                                <label for="buttonRoles">Button Management Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to all buttons in the log embed.</small>
+                                <select class="form-control" id="buttonRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.button_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="acceptRoles">Accept Button Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use the accept button.</small>
+                                <select class="form-control" id="acceptRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.accept_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="rejectRoles">Reject Button Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use the reject button.</small>
+                                <select class="form-control" id="rejectRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.reject_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="acceptReasonRoles">Accept with Reason Button Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use the accept with reason button.</small>
+                                <select class="form-control" id="acceptReasonRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.accept_reason_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="rejectReasonRoles">Reject with Reason Button Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use the reject with reason button.</small>
+                                <select class="form-control" id="rejectReasonRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.reject_reason_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Roles -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="statusRolesHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#statusRolesCollapse" aria-expanded="false" aria-controls="statusRolesCollapse">
+                            Action on status change
+                        </button>
+                    </h2>
+                    <div id="statusRolesCollapse" class="accordion-collapse collapse" aria-labelledby="statusRolesHeading" data-bs-parent="#roleSettingsAccordion">
+                        <div class="accordion-body">
+                            <div class="form-group">
+                                <label for="acceptedRoles">Accepted Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be added to users when their application is accepted.</small>
+                                <select class="form-control" id="acceptedRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.accepted_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="deniedRoles">Denied Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be added to users when their application is denied.</small>
+                                <select class="form-control" id="deniedRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.denied_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="acceptedRemovalRoles">Accepted Removal Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be removed from users when their application is accepted.</small>
+                                <select class="form-control" id="acceptedRemovalRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.accepted_removal_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="deniedRemovalRoles">Denied Removal Roles</label>
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be removed from users when their application is denied.</small>
+                                <select class="form-control" id="deniedRemovalRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.denied_removal_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Other Roles -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="otherRolesHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#otherRolesCollapse" aria-expanded="false" aria-controls="otherRolesCollapse">
+                            Ping on new application
+                        </button>
+                    </h2>
+                    <div id="otherRolesCollapse" class="accordion-collapse collapse" aria-labelledby="otherRolesHeading" data-bs-parent="#roleSettingsAccordion">
+                        <div class="accordion-body">
+                            <div class="form-group">
+                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be pinged when an application log embed is sent.</small>
+                                <select class="form-control" id="pingRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.ping_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

@@ -26,15 +26,22 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <!-- Hamburger Menu -->
+    <button class="hamburger-menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
     <!-- Sidebar -->
     <div class="sidebar">
-        <div class="user-info">
-            {% if user.avatar %}
-            <img src="{{ user.avatar }}" alt="{{ user.name }}">
-            {% endif %}
-            <div>
-                <strong>{{ user.name }}</strong><br>
-                <small class="text">{% if is_admin %}Admin{% else %}Viewer{% endif %}</small>
+        <div class="sidebar-header">
+            <div class="user-info">
+                {% if user.avatar %}
+                <img src="{{ user.avatar }}" alt="{{ user.name }}">
+                {% endif %}
+                <div>
+                    <strong>{{ user.name }}</strong><br>
+                    <small class="text">{% if is_admin %}Admin{% else %}Viewer{% endif %}</small>
+                </div>
             </div>
         </div>
         <nav class="nav flex-column">
@@ -77,6 +84,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.9/js/select2.min.js"></script>
     <script src="/static/js/utils.js"></script>
 
-    {% block extra_js %}{% endblock %}
 </body>
 </html> 
