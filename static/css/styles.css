@@ -55,6 +55,10 @@ body {
     color: var(--text);
   }
 
+.form-text {
+    color: var(--text);
+}
+
 /* Navigation */
 .nav-link {
     color: var(--text);
@@ -192,6 +196,10 @@ body {
 .form-control:focus {
     border-color: white;
     outline: none;
+}
+
+.char-count {
+    color: var(--text);
 }
 
 textarea.form-control {
@@ -1182,7 +1190,7 @@ h6 {
         padding: 6px 12px;
         font-size: 0.9em;
     }
-}
+}   
 
 .hamburger-menu {
     display: none;

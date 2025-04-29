@@ -181,8 +181,13 @@ class ApplicationBot(discord.Client):
         with open(json_path, 'w') as f:
             json.dump(final_app_data, f, indent=4)
         
-        # Send confirmation
-        await message.channel.send("Thank you! Your application has been submitted for review. 🎉")
+        # Send confirmation in an embed
+        embed = discord.Embed(
+            title=f"{app_data['position']} Application Submitted",
+            description="Thank you! Your application has been submitted for review. 🎉",
+            color=discord.Color.green()
+        )
+        await message.channel.send(embed=embed)
         
         # Get position settings
         questions = load_questions()

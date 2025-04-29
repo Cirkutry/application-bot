@@ -149,8 +149,13 @@ async def handle_dm_message(bot, message):
         position_settings = questions.get(application['position'], {})
         completion_message = position_settings.get('completion_message', f"Thank you for completing your application for {application['position']}! Your responses have been submitted and will be reviewed soon.")
         
-        # Send completion message
-        await message.channel.send(completion_message.format(position=application['position']))
+        # Send completion message in an embed
+        embed = discord.Embed(
+            title=f"{application['position']} Application Submitted",
+            description=completion_message.format(position=application['position']),
+            color=discord.Color.green()
+        )
+        await message.channel.send(embed=embed)
         
         # Log the application
         questions = load_questions()
@@ -191,8 +196,14 @@ async def handle_dm_message(bot, message):
                     view = ApplicationResponseView(application_id, application['position'])
                     view.bot = bot
                     
+                    # Prepare role pings if specified
+                    ping_mentions = ""
+                    ping_roles = position_settings.get('ping_roles', [])
+                    if ping_roles:
+                        ping_mentions = ' '.join([f"<@&{role_id}>" for role_id in ping_roles])
+                    
                     # Send the embed
-                    log_message = await log_channel.send(embed=embed, view=view)
+                    log_message = await log_channel.send(content=ping_mentions if ping_mentions else None, embed=embed, view=view)
                     
                     # Create thread if auto_thread is enabled
                     if position_settings.get('auto_thread', False):
@@ -201,12 +212,6 @@ async def handle_dm_message(bot, message):
                             await log_message.create_thread(name=thread_name, auto_archive_duration=1440)
                         except Exception as e:
                             logger.error(f"Error creating thread: {e}")
-                    
-                    # Ping roles if specified
-                    ping_roles = position_settings.get('ping_roles', [])
-                    if ping_roles:
-                        ping_mentions = ' '.join([f"<@&{role_id}>" for role_id in ping_roles])
-                        await log_channel.send(ping_mentions)
             except Exception as e:
                 logger.error(f"Error logging application: {e}")
 
@@ -281,7 +286,7 @@ class StaffApplicationSelect(Select):
                                 dm_link = await get_dm_link(self.view.bot, interaction.user)
                                 
                                 # Send followup message
-                                await interaction.followup.send(f"I've sent you a DM to continue your application!\n[Click here to open your DMs]({dm_link})", ephemeral=True)
+                                await interaction.followup.send(f"You must continue and complete your current application before you can start a new one!\n[Click here to open your DMs]({dm_link})", ephemeral=True)
                             else:
                                 # Get DM link
                                 dm_link = await get_dm_link(self.view.bot, interaction.user)
@@ -389,9 +394,14 @@ class StaffApplicationSelect(Select):
                 position_settings = questions_data.get(position, {})
                 welcome_message = position_settings.get('welcome_message', f"Thank you for applying for the {position} position!")
                 
-                # Send welcome message with Start and Cancel buttons
+                # Send welcome message with Start and Cancel buttons inside an embed
                 welcome_view = ApplicationStartView(self.view.bot, application_data)
-                welcome_message = await dm.send(welcome_message.format(position=position), view=welcome_view)
+                embed = discord.Embed(
+                    title=f"{position} Application",
+                    description=welcome_message.format(position=position),
+                    color=discord.Color.blue()
+                )
+                welcome_message = await dm.send(embed=embed, view=welcome_view)
                 
                 if str(interaction.user.id) in self.view.bot.active_applications:
                     self.view.bot.active_applications[str(interaction.user.id)]['message_id'] = str(welcome_message.id)
@@ -418,7 +428,7 @@ class StaffApplicationSelect(Select):
                 dm_link = await get_dm_link(self.view.bot, interaction.user)
                 
                 # Send followup message
-                await interaction.followup.send(f"I've sent you a DM with the application questions! Please check your DMs to start or cancel the application.\n[Click here to open your DMs]({dm_link})", ephemeral=True)
+                await interaction.followup.send(f"You must start or cancel your current application before you can start a new one!\n[Click here to open your DMs]({dm_link})", ephemeral=True)
                 
                 # Refresh the select menu for other users
                 await self.refresh_select_menu(interaction)
@@ -573,9 +583,21 @@ class ReasonModal(Modal):
             
             # Send DM first, before any role changes
             if self.action == 'accept':
-                await dm_channel.send(f"## ACCEPTED!\n\n{self.reason.value}")
+                message = position_settings.get('accepted_message', 'Your application has been accepted!')
+                embed = discord.Embed(
+                    title="Application Accepted!",
+                    description=self.reason.value,
+                    color=discord.Color.green()
+                )
+                await dm_channel.send(embed=embed)
             else:
-                await dm_channel.send(f"## DENIED!\n\n{self.reason.value}")
+                message = position_settings.get('denied_message', 'Your application has been denied.')
+                embed = discord.Embed(
+                    title="Application Denied",
+                    description=self.reason.value,
+                    color=discord.Color.red()
+                )
+                await dm_channel.send(embed=embed)
             dm_sent = True
             
             # Only proceed with role changes if DM was sent successfully
@@ -778,10 +800,20 @@ class ApplicationResponseButton(Button):
                 # Send DM first, before any role changes
                 if self.action == 'accept':
                     message = position_settings.get('accepted_message', 'Your application has been accepted!')
-                    await dm_channel.send(f"## ACCEPTED!\n\n{message.format(position=application['position'])}")
+                    embed = discord.Embed(
+                        title="Application Accepted!",
+                        description=message.format(position=application['position']),
+                        color=discord.Color.green()
+                    )
+                    await dm_channel.send(embed=embed)
                 else:
                     message = position_settings.get('denied_message', 'Your application has been denied.')
-                    await dm_channel.send(f"## DENIED!\n\n{message.format(position=application['position'])}")
+                    embed = discord.Embed(
+                        title="Application Denied",
+                        description=message.format(position=application['position']),
+                        color=discord.Color.red()
+                    )
+                    await dm_channel.send(embed=embed)
                 dm_sent = True
                 
                 # Only proceed with role changes if DM was sent successfully
@@ -1007,8 +1039,13 @@ class ApplicationStartButton(Button):
             await dm_channel.send(f"⏰ **Note:** You have {time_limit} minutes to complete all questions in this application.")
             await dm_channel.send(f"**Question 1 of {total_questions}:** {app_data['questions'][0]}")
             
-            # Remove the buttons in the original message
-            await interaction.message.edit(view=None)
+            # Update the original embed with green color and "Application Started" footer
+            original_embed = interaction.message.embeds[0]
+            original_embed.color = discord.Color.green()
+            original_embed.set_footer(text="Application has been started.")
+            
+            # Remove the buttons and update the embed in the original message
+            await interaction.message.edit(embed=original_embed, view=None)
         else:
             # Cancel the application
             # Remove the application from active applications
@@ -1018,10 +1055,14 @@ class ApplicationStartButton(Button):
             
             # Acknowledge the interaction and inform the user
             await interaction.response.defer()
-            await interaction.channel.send("Application cancelled. You can apply again at any time.")
             
-            # Remove the buttons in the original message
-            await interaction.message.edit(view=None)
+            # Update the original embed with red color and "Application Cancelled" footer
+            original_embed = interaction.message.embeds[0]
+            original_embed.color = discord.Color.red()
+            original_embed.set_footer(text="Application has been cancelled.")
+            
+            # Remove the buttons and update the embed in the original message
+            await interaction.message.edit(embed=original_embed, view=None)
         
         # Stop listening for button presses
         self.view.stop()

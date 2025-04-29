@@ -21,48 +21,52 @@
                     <input class="form-check-input" type="checkbox" id="positionEnabled" {% if settings.enabled %}checked{% endif %}>
                     <label class="form-check-label" for="positionEnabled">Enable Position</label>
                 </div>
-                <small><i class="fa-regular fa-circle-question"></i> When enabled, applicants will be able to apply for this position.</small>
+                <div class="form-text"><i class="fa-regular fa-circle-question"></i> When enabled, applicants will be able to apply for this position.</div>
             </div>
             <div class="form-group">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="autoThread" {% if settings.auto_thread %}checked{% endif %}>
                     <label class="form-check-label" for="autoThread">Auto Thread</label>
                 </div>
-                <small><i class="fa-regular fa-circle-question"></i> When enabled, a thread will be automatically created for each new application.</small>
+                <div class="form-text"><i class="fa-regular fa-circle-question"></i> When enabled, a thread will be automatically created for each new application.</div>
             </div>
             <div class="form-group">
                 <label for="timeLimit">Time Limit (minutes)</label>
                 <input type="number" class="form-control" id="timeLimit" min="1" max="1440" value="{{ settings.time_limit|default(60) }}">
-                <small><i class="fa-regular fa-circle-question"></i> Maximum time allowed for applicants to complete all questions.</small>
+                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Maximum time allowed for applicants to complete all questions.</div>
             </div>
             <div class="form-group">
                 <label for="logChannel">Log Channel ID</label>
                 <input type="text" class="form-control" id="logChannel" value="{{ settings.log_channel }}">
             </div>
-            <small><i class="fa-regular fa-circle-question"></i> The channel where this application's logs will be sent.</small>
+            <div class="form-text"><i class="fa-regular fa-circle-question"></i> The channel where this application's logs will be sent.</div>
         </div>
 
         <div class="form-section">
             <h3>Messages</h3>
             <div class="form-group">
                 <label for="welcomeMessage">Welcome Message</label>
-                <textarea id="welcomeMessage" class="form-control" rows="3">{{ settings.welcome_message }}</textarea>
-                <small><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when they start the application.</small>
+                <div class="char-count">{{ settings.welcome_message|length }}/4096</div>
+                <textarea id="welcomeMessage" class="form-control" rows="3" maxLength="4096">{{ settings.welcome_message }}</textarea>
+                <div class="form-text"><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when they start the application. Max 4096 characters.</div>
             </div>
             <div class="form-group">
                 <label for="completionMessage">Completion Message</label>
-                <textarea id="completionMessage" class="form-control" rows="3">{{ settings.completion_message }}</textarea>
-                <small><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when they complete the application.</small>
+                <div class="char-count">{{ settings.completion_message|length }}/4096</div>
+                <textarea id="completionMessage" class="form-control" rows="3" maxLength="4096">{{ settings.completion_message }}</textarea>
+                <div class="form-text"><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when they complete the application. Max 4096 characters.</div>
             </div>
             <div class="form-group">
                 <label for="acceptedMessage">Accepted Message</label>
-                <textarea id="acceptedMessage" class="form-control" rows="3">{{ settings.accepted_message }}</textarea>
-                <small><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when their application is accepted.</small>
+                <div class="char-count">{{ settings.accepted_message|length }}/4096</div>
+                <textarea id="acceptedMessage" class="form-control" rows="3" maxLength="4096">{{ settings.accepted_message }}</textarea>
+                <div class="form-text"><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when their application is accepted. Max 4096 characters.</div>
             </div>
             <div class="form-group">
                 <label for="deniedMessage">Denied Message</label>
-                <textarea id="deniedMessage" class="form-control" rows="3">{{ settings.denied_message }}</textarea>
-                <small><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when their application is denied.</small>
+                <div class="char-count">{{ settings.denied_message|length }}/4096</div>
+                <textarea id="deniedMessage" class="form-control" rows="3" maxLength="4096">{{ settings.denied_message }}</textarea>
+                <div class="form-text"><i class="fa-regular fa-circle-question"></i> The message that will be sent to applicants when their application is denied. Max 4096 characters.</div>
             </div>
         </div>
 
@@ -87,7 +91,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will not be able to apply for this position.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will not be able to apply for this position.</div>
                             </div>
                             <div class="form-group">
                                 <label for="requiredRoles">Required Roles</label>
@@ -98,7 +102,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that are required to apply for this position.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that are required to apply for this position.</div>
                             </div>
                         </div>
                     </div>
@@ -122,7 +126,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use all the buttons in the log embed.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be able to use all the buttons in the log embed.</div>
                             </div>
                             <div class="form-group">
                                 <label for="acceptRoles">Accept Button Roles</label>
@@ -133,7 +137,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the accept button.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the accept button.</div>
                             </div>
                             <div class="form-group">
                                 <label for="rejectRoles">Reject Button Roles</label>
@@ -144,7 +148,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the reject button.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the reject button.</div>
                             </div>
                             <div class="form-group">
                                 <label for="acceptReasonRoles">Accept with Reason Button Roles</label>
@@ -155,7 +159,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the accept with reason button.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the accept with reason button.</div>
                             </div>
                             <div class="form-group">
                                 <label for="rejectReasonRoles">Reject with Reason Button Roles</label>
@@ -166,7 +170,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the reject with reason button.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be able to use only the reject with reason button.</div>
                             </div>
                         </div>
                     </div>
@@ -190,7 +194,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be added to user when their application is accepted.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be added to user when their application is accepted.</div>
                             </div>
                             <div class="form-group">
                                 <label for="deniedRoles">Denied Roles</label>
@@ -201,7 +205,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be added to user when their application is denied.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be added to user when their application is denied.</div>
                             </div>
                             <div class="form-group">
                                 <label for="acceptedRemovalRoles">Accepted Removal Roles</label>
@@ -212,7 +216,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be removed from user when their application is accepted.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be removed from user when their application is accepted.</div>
                             </div>
                             <div class="form-group">
                                 <label for="deniedRemovalRoles">Denied Removal Roles</label>
@@ -223,7 +227,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be removed from user when their application is denied.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be removed from user when their application is denied.</div>
                             </div>
                         </div>
                     </div>
@@ -246,7 +250,7 @@
                                     </option>
                                     {% endfor %}
                                 </select>
-                                <small><i class="fa-regular fa-circle-question"></i> Roles that will be pinged when an application log embed is sent.</small>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be pinged when an application log embed is sent.</div>
                             </div>
                         </div>
                     </div>

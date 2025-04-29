@@ -207,6 +207,9 @@ function openEditPositionModal(button) {
     document.getElementById('deniedMessage').value = data.denied_message;
     document.getElementById('completionMessage').value = data.completion_message;
     
+    // Add event listeners to update character counts
+    setupCharacterCountListeners();
+    
     // Set role selections
     const roleSelects = [
         'restrictedRoles',
@@ -369,6 +372,38 @@ function addQuestion() {
 function updateQuestionOrder() {
     const questions = Array.from(document.querySelectorAll('.question-input')).map(input => input.value);
     // The order is already maintained in the DOM, so we just need to collect the values
+}
+
+// Setup character count listeners for message textareas
+function setupCharacterCountListeners() {
+    // Get all textareas with maxLength attribute
+    const textareas = [
+        document.getElementById('welcomeMessage'),
+        document.getElementById('completionMessage'),
+        document.getElementById('acceptedMessage'),
+        document.getElementById('deniedMessage')
+    ];
+    
+    // Add event listeners for each textarea
+    textareas.forEach(textarea => {
+        if (!textarea) return;
+        
+        // Find the character count element right before the textarea
+        const charCount = textarea.previousElementSibling;
+        if (!charCount || !charCount.classList.contains('char-count')) return;
+        
+        // Update on input
+        textarea.addEventListener('input', function() {
+            charCount.textContent = `${this.value.length}/${this.maxLength}`;
+            
+            // Change color when approaching limit
+            if (this.value.length > this.maxLength * 0.9) {
+                charCount.style.color = '#dc3545';
+            } else {
+                charCount.style.color = '#ffffff';
+            }
+        });
+    });
 }
 
 // Initialize on page load
@@ -583,5 +618,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             closeDeleteQuestionModal();
         });
+    }
+
+    // Check if we're on the edit position page by looking for the editPositionForm
+    const editForm = document.getElementById('editPositionForm');
+    if (editForm) {
+        setupCharacterCountListeners();
     }
 });
