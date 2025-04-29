@@ -218,7 +218,7 @@ class StaffApplicationSelect(Select):
         # Set the custom_id to include the panel_id and make it consistent
         custom_id = f"staff_application_select_{self.panel_id}"
         super().__init__(
-            placeholder="Select a position to apply for...",
+            placeholder="Select a position to apply for.",
             options=options,
             custom_id=custom_id,
             min_values=1,
@@ -275,7 +275,7 @@ class StaffApplicationSelect(Select):
                             # If there are still questions to answer
                             if current_question < len(questions):
                                 # Send the current question via DM
-                                await dm.send(f"**Continuing your application...**\n**Question {current_question + 1} of {len(questions)}:** {questions[current_question]}")
+                                await dm.send(f"**Continuing your application!**\n**Question {current_question + 1} of {len(questions)}:** {questions[current_question]}")
                                 
                                 # Get DM link
                                 dm_link = await get_dm_link(self.view.bot, interaction.user)
@@ -526,7 +526,7 @@ class ReasonModal(Modal):
         self.application_id = application_id
         self.reason = TextInput(
             label="Reason",
-            placeholder="Enter your reason here...",
+            placeholder="Enter your reason here",
             style=discord.TextStyle.paragraph,
             required=True
         )

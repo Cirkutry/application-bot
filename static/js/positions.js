@@ -227,18 +227,8 @@ function openEditPositionModal(button) {
     roleSelects.forEach(selectId => {
         const select = document.getElementById(selectId);
         if (select) {
-            // Destroy any existing Select2 instance
-            if ($(select).hasClass('select2-hidden-accessible')) {
-                $(select).select2('destroy');
-            }
-            
-            // Initialize Select2 with modal-specific configuration
-            $(select).select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: 'Select options...',
-                allowClear: true,
-                closeOnSelect: false,
+
+            initializeSelect2(`#${selectId}`, {
                 dropdownParent: $('#editPositionModal')
             });
             
@@ -435,13 +425,13 @@ document.addEventListener('DOMContentLoaded', function() {
         deleteQuestionModal.style.display = 'none';
     }
 
+    // Initialize sidebar
+    initializeSidebar();
+    
     // Add Position button click handler
     const addPositionBtn = document.getElementById('addPositionBtn');
     if (addPositionBtn) {
-        addPositionBtn.addEventListener('click', function() {
-            console.log('Add Position button clicked');
-            openAddPositionModal();
-        });
+        addPositionBtn.addEventListener('click', openAddPositionModal);
     }
 
     // Add Question button click handler

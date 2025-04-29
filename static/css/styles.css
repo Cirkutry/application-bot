@@ -1117,6 +1117,7 @@ h6 {
 .sidebar-footer a {
     color: var(--text-secondary);
     transition: color 0.2s ease;
+    text-decoration: none;
 }
 
 .accordion-button {
