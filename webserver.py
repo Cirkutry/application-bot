@@ -260,7 +260,8 @@ async def auth_login(request):
         'redirect_uri': REDIRECT_URI,
         'response_type': 'code',
         'scope': 'identify',
-        'state': state
+        'state': state,
+        'prompt': 'none'
     }
     oauth_url = f"{API_ENDPOINT}/oauth2/authorize?{urllib.parse.urlencode(params)}"
     
