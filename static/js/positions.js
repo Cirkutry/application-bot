@@ -40,8 +40,14 @@ async function submitPosition(event) {
 
 async function submitEditPosition(event) {
     event.preventDefault();
-    const positionName = document.getElementById('editPositionName').value;
+    const positionName = document.getElementById('editPositionName').value.trim();
+    const originalPosition = document.getElementById('editPositionName').getAttribute('value');
     const logChannelId = document.getElementById('logChannel').value.trim();
+    
+    if (!positionName) {
+        showErrorToast('Position name cannot be empty');
+        return;
+    }
     
     // Validate log channel if provided
     if (logChannelId) {
@@ -92,12 +98,12 @@ async function submitEditPosition(event) {
             },
             body: JSON.stringify({
                 name: positionName,
+                original_position: originalPosition,
                 settings: settings
             })
         });
 
         if (response.ok) {
-
             sessionStorage.setItem('toastMessage', 'Position updated successfully');
             sessionStorage.setItem('toastType', 'success');
             window.location.href = '/positions';

@@ -1025,6 +1025,7 @@ async def update_position(request):
         data = await request.json()
         position_name = data.get('name')
         settings = data.get('settings')
+        original_position = data.get('original_position', position_name)
         
         if not position_name or not settings:
             return web.Response(text='Position name and settings are required', status=400)
@@ -1032,9 +1033,21 @@ async def update_position(request):
         # Load existing questions
         questions = load_questions()
         
-        # Check if position exists
-        if position_name not in questions:
+        # Check if original position exists
+        if original_position not in questions:
             return web.Response(text='Position not found', status=404)
+        
+        # Check if we're renaming the position
+        if position_name != original_position:
+            # Check if the new position name already exists
+            if position_name in questions:
+                return web.Response(text='A position with this name already exists', status=400)
+            
+            # Create new position with the new name
+            questions[position_name] = questions[original_position].copy()
+            
+            # Delete the old position
+            del questions[original_position]
         
         # Update settings
         questions[position_name].update({

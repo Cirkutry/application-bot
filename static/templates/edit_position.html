@@ -12,10 +12,14 @@
 
 <div class="card panel-creator">
     <form id="editPositionForm" onsubmit="submitEditPosition(event)">
-        <input type="hidden" id="editPositionName" value="{{ position }}">
         
         <div class="form-section">
             <h3>Basic Settings</h3>
+            <div class="form-group">
+                <label for="editPositionName">Position Name</label>
+                <input type="text" class="form-control" id="editPositionName" value="{{ position }}">
+                <div class="form-text"><i class="fa-regular fa-circle-question"></i> The name of this position.</div>
+            </div>
             <div class="form-group">
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="positionEnabled" {% if settings.enabled %}checked{% endif %}>
