@@ -208,7 +208,7 @@ async def handle_dm_message(bot, message):
                     # Create thread if auto_thread is enabled
                     if position_settings.get('auto_thread', False):
                         try:
-                            thread_name = f"{message.author.name}'s {application['position']} Application"
+                            thread_name = f"{application['position']} - {message.author.name}"
                             await log_message.create_thread(name=thread_name, auto_archive_duration=1440)
                         except Exception as e:
                             logger.error(f"Error creating thread: {e}")
