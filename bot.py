@@ -210,6 +210,12 @@ class ApplicationBot(discord.Client):
                 embed.add_field(name="Application ID", value=app_id)
                 # Add masked link to application
                 web_url = f"http://{os.getenv('WEB_HOST', 'localhost')}:{os.getenv('WEB_PORT', '8080')}/application/{app_id}"
+                
+                # Replace with WEB_EXTERNAL if it's set
+                web_external = os.getenv('WEB_EXTERNAL')
+                if web_external:
+                    web_url = f"{web_external}/application/{app_id}"
+                
                 embed.add_field(name="View Application", value=f"[Click Here]({web_url})", inline=False)
                 
                 # Create and register view with the bot - single clean way
@@ -260,9 +266,15 @@ async def setup_applications(interaction: discord.Interaction):
 @bot.tree.command(name="panel_create", description="Create a new application panel through the dashboard")
 @app_commands.default_permissions(administrator=True)
 async def panel_create(interaction: discord.Interaction):
+    web_url = f"http://{os.getenv('WEB_HOST', 'localhost')}:{os.getenv('WEB_PORT', 8080)}/panels/create"
+    
+    # Use WEB_EXTERNAL if it's set
+    web_external = os.getenv('WEB_EXTERNAL')
+    if web_external:
+        web_url = f"{web_external}/panels/create"
+    
     await interaction.response.send_message(
-        "Please use the web dashboard to create and manage panels. Visit the dashboard at "
-        f"http://{os.getenv('WEB_HOST', 'localhost')}:{os.getenv('WEB_PORT', 8080)}/panels/create",
+        f"Please use the web dashboard to create and manage panels. Visit the dashboard at {web_url}",
         ephemeral=True
     )
 

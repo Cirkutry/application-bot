@@ -170,6 +170,11 @@ async def handle_dm_message(bot, message):
                     web_port = os.getenv('WEB_PORT', '8080')
                     application_url = f"http://{web_host}:{web_port}/application/{application_id}"
                     
+                    # Replace with WEB_EXTERNAL if it's set
+                    web_external = os.getenv('WEB_EXTERNAL')
+                    if web_external:
+                        application_url = f"{web_external}/application/{application_id}"
+                    
                     # Create embed for the application
                     embed = discord.Embed(
                         title=f"{message.author.name}'s {application['position']} application",

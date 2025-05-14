@@ -63,6 +63,9 @@ Required environment variables:
 
 - `WEB_PORT`: Port for the web dashboard - Make sure your firewall has this port open if you're accessing the dashboard from outside the host IP.
 
+Optional environment variables:
+- `WEB_EXTERNAL`: External URL for the web dashboard - If set (e.g., "https://application.org" or "http://application.org"), it will be used as the base URL for application links and the dashboard URL instead of the WEB_HOST:WEB_PORT combination. This is useful when your application is behind a reverse proxy or when you want to use a domain name instead of an IP address.
+
 - `OAUTH_CLIENT_ID`: Discord OAuth client ID - (See #discord-developer-portal-setup for more info)
 
 - `OAUTH_CLIENT_SECRET`: Discord OAuth client secret - (See #discord-developer-portal-setup for more info)

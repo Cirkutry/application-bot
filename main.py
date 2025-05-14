@@ -268,7 +268,14 @@ async def main():
         
         # Log startup information
         logging.info(f"Bot is ready! Connected to server: {server_name}")
-        logging.info(f"Dashboard is available at: http://{WEB_HOST}:{WEB_PORT}")
+        dashboard_url = f"http://{WEB_HOST}:{WEB_PORT}"
+        
+        # Use WEB_EXTERNAL if it's set
+        web_external = os.getenv('WEB_EXTERNAL')
+        if web_external:
+            dashboard_url = web_external
+            
+        logging.info(f"Dashboard is available at: {dashboard_url}")
         logging.info("Bot is now running!")
     
     # Set up exception handler
