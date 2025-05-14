@@ -428,7 +428,7 @@ class StaffApplicationSelect(Select):
                 dm_link = await get_dm_link(self.view.bot, interaction.user)
                 
                 # Send followup message
-                await interaction.followup.send(f"You must start or cancel your current application before you can start a new one!\n[Click here to open your DMs]({dm_link})", ephemeral=True)
+                await interaction.followup.send(f"Application initiated! Please check your DMs to start the application process.\n[Click here to open your DMs]({dm_link})", ephemeral=True)
                 
                 # Refresh the select menu for other users
                 await self.refresh_select_menu(interaction)
