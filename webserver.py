@@ -193,7 +193,7 @@ async def get_user_info(user_id):
     return {
         'id': str(member.id),
         'name': member.name,
-        'avatar': member.avatar.url if member.avatar else None,
+        'avatar': member.display_avatar.url if member.display_avatar else None,
         'roles': [str(role.id) for role in member.roles],
         'is_admin': member.guild_permissions.administrator
     }
@@ -493,7 +493,7 @@ async def applications(request):
         if server:
             member = server.get_member(int(app.get('user_id', '0')))
             if member:
-                app['user_avatar'] = str(member.avatar.url) if member.avatar else None
+                app['user_avatar'] = str(member.display_avatar.url) if member.display_avatar else None
                 app['user_name'] = member.name  # Use the current Discord username
             else:
                 # Fallback to stored username or "Unknown User" if member not found
@@ -628,7 +628,7 @@ async def application(request):
     if server:
         member = server.get_member(int(application.get('user_id', '0')))
         if member:
-            application['user_avatar'] = str(member.avatar.url) if member.avatar else None
+            application['user_avatar'] = str(member.display_avatar.url) if member.display_avatar else None
             application['user_name'] = member.name
         else:
             application['user_avatar'] = None
