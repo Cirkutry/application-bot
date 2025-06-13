@@ -81,14 +81,6 @@ async def handle_dm_message(bot, message):
     if not application:
         return
         
-    # Validate that this is a properly initialized application
-    required_fields = ['start_time', 'questions', 'current_question', 'answers']
-    if not all(field in application for field in required_fields):
-        # This is an invalid application, remove it
-        del bot.active_applications[str(message.author.id)]
-        save_active_applications(bot.active_applications)
-        return
-        
     if 'start_time' not in application:
         return
         
@@ -268,51 +260,83 @@ class StaffApplicationSelect(Select):
                     if active_app['position'] == position and active_app['panel_id'] == self.panel_id:
                         # Check if application has been started
                         if 'start_time' not in active_app:
-                            # Get DM link
-                            dm_link = await get_dm_link(self.view.bot, interaction.user)
-                            await interaction.response.send_message(
-                                f"You have an active application but haven't started it yet. Please check your DMs to start or cancel the application.\n[Click here to open your DMs]({dm_link})",
-                                ephemeral=True
-                            )
-                            # Refresh the select menu for other users
-                            await self.refresh_select_menu(interaction)
-                            return
+                            # Delete the old application
+                            del self.view.bot.active_applications[str(interaction.user.id)]
+                            save_active_applications(self.view.bot.active_applications)
                             
-                        # Calculate which question to send next
-                        current_question = active_app['current_question']
-                        questions = active_app['questions']
-                        
-                        # Always use DM for questions, not ephemeral responses
-                        try:
-                            # Defer the interaction response first
-                            await interaction.response.defer(ephemeral=True)
+                            # Try to delete the old welcome message if it exists
+                            if 'message_id' in active_app:
+                                try:
+                                    dm_channel = await interaction.user.create_dm()
+                                    try:
+                                        old_message = await dm_channel.fetch_message(int(active_app['message_id']))
+                                        await old_message.delete()
+                                    except:
+                                        pass  # Ignore if message doesn't exist or can't be deleted
+                                except:
+                                    pass  # Ignore if DM channel can't be created
                             
-                            # Create DM channel
-                            dm = await interaction.user.create_dm()
+                            # Get questions for the position
+                            questions = get_questions(position)
+                            if not questions or len(questions) == 0:
+                                logger.error(f"No questions loaded for position {position}")
+                                await interaction.response.send_message(
+                                    "This position has no questions set up. Please contact an administrator.",
+                                    ephemeral=True
+                                )
+                                # Refresh the select menu for other users
+                                await self.refresh_select_menu(interaction)
+                                return
                             
-                            # If there are still questions to answer
-                            if current_question < len(questions):
-                                # Send the current question via DM
-                                await dm.send(f"**Continuing your application!**\n**Question {current_question + 1} of {len(questions)}:** {questions[current_question]}")
+                            # Create a new application
+                            application_data = {
+                                'user_id': str(interaction.user.id),
+                                'user_name': interaction.user.name,
+                                'position': position,
+                                'questions': questions,
+                                'answers': [],
+                                'current_question': 0,
+                                'panel_id': self.panel_id
+                            }
+                            
+                            # Store the new application
+                            self.view.bot.active_applications[str(interaction.user.id)] = application_data
+                            save_active_applications(self.view.bot.active_applications)
+                            
+                            # Send new welcome message
+                            try:
+                                dm = await interaction.user.create_dm()
+                                
+                                # Get position settings to access welcome message
+                                questions_data = load_questions()
+                                position_settings = questions_data.get(position, {})
+                                welcome_message = position_settings.get('welcome_message', f"Thank you for applying for the {position} position!")
+                                
+                                welcome_view = ApplicationStartView(self.view.bot, application_data)
+                                embed = discord.Embed(
+                                    title=f"{position} Application",
+                                    description=welcome_message.format(position=position),
+                                    color=discord.Color.blue()
+                                )
+                                welcome_message = await dm.send(embed=embed, view=welcome_view)
+                                
+                                # Save the new message ID
+                                self.view.bot.active_applications[str(interaction.user.id)]['message_id'] = str(welcome_message.id)
+                                save_active_applications(self.view.bot.active_applications)
                                 
                                 # Get DM link
                                 dm_link = await get_dm_link(self.view.bot, interaction.user)
-                                
-                                # Send followup message
-                                await interaction.followup.send(f"You must continue and complete your current application before you can start a new one!\n[Click here to open your DMs]({dm_link})", ephemeral=True)
-                            else:
-                                # Get DM link
-                                dm_link = await get_dm_link(self.view.bot, interaction.user)
-                                
-                                # All questions answered, send a message to continue in DMs
-                                await interaction.followup.send(f"You have already answered all questions. Please continue in your DMs with the bot.\n[Click here to open your DMs]({dm_link})", ephemeral=True)
+                                await interaction.response.send_message(
+                                    f"Please check your DMs to start or cancel the application.\n[Click here to open your DMs]({dm_link})",
+                                    ephemeral=True
+                                )
+                            except Exception as e:
+                                logger.error(f"Error sending new welcome message: {e}")
+                                await interaction.response.send_message(
+                                    "Failed to send you a DM. Please check your Privacy settings for this server and make sure Direct Messages are enabled.",
+                                    ephemeral=True
+                                )
                             
-                            # Refresh the select menu for other users
-                            await self.refresh_select_menu(interaction)
-                            return
-                        except Exception as e:
-                            logger.error(f"Error sending DM: {e}")
-                            await interaction.followup.send("Failed to send you a DM to start the application! Please check your Privacy settings for this server and make sure Direct Messages are enabled and try again.", ephemeral=True)
                             # Refresh the select menu for other users
                             await self.refresh_select_menu(interaction)
                             return
