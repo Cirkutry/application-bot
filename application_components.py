@@ -81,6 +81,14 @@ async def handle_dm_message(bot, message):
     if not application:
         return
         
+    # Validate that this is a properly initialized application
+    required_fields = ['start_time', 'questions', 'current_question', 'answers']
+    if not all(field in application for field in required_fields):
+        # This is an invalid application, remove it
+        del bot.active_applications[str(message.author.id)]
+        save_active_applications(bot.active_applications)
+        return
+        
     if 'start_time' not in application:
         return
         
