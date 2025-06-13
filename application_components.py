@@ -260,6 +260,9 @@ class StaffApplicationSelect(Select):
                     if active_app['position'] == position and active_app['panel_id'] == self.panel_id:
                         # Check if application has been started
                         if 'start_time' not in active_app:
+                            # Defer the interaction response first to prevent timeout
+                            await interaction.response.defer(ephemeral=True)
+                            
                             # Delete the old application
                             del self.view.bot.active_applications[str(interaction.user.id)]
                             save_active_applications(self.view.bot.active_applications)
@@ -280,7 +283,7 @@ class StaffApplicationSelect(Select):
                             questions = get_questions(position)
                             if not questions or len(questions) == 0:
                                 logger.error(f"No questions loaded for position {position}")
-                                await interaction.response.send_message(
+                                await interaction.followup.send(
                                     "This position has no questions set up. Please contact an administrator.",
                                     ephemeral=True
                                 )
@@ -326,13 +329,13 @@ class StaffApplicationSelect(Select):
                                 
                                 # Get DM link
                                 dm_link = await get_dm_link(self.view.bot, interaction.user)
-                                await interaction.response.send_message(
+                                await interaction.followup.send(
                                     f"Please check your DMs to start or cancel the application.\n[Click here to open your DMs]({dm_link})",
                                     ephemeral=True
                                 )
                             except Exception as e:
                                 logger.error(f"Error sending new welcome message: {e}")
-                                await interaction.response.send_message(
+                                await interaction.followup.send(
                                     "Failed to send you a DM. Please check your Privacy settings for this server and make sure Direct Messages are enabled.",
                                     ephemeral=True
                                 )
