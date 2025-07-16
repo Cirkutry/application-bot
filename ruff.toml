@@ -1,0 +1,90 @@
+# https://docs.astral.sh/ruff/configuration/
+
+# Python version compatibility
+target-version = "py312"
+
+# Disable/Enable auto-fixing for compatible rules
+fix = false
+
+# Line length (matches Black's default)
+line-length = 120
+
+# Directories to exclude from linting
+exclude = [
+    ".git",
+    ".ruff_cache",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "migrations",
+    ".pytest_cache",
+]
+
+[lint]
+# Enable these rule categories
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort (import sorting)
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "SIM", # flake8-simplify
+    "PIE", # flake8-pie
+    "PT",  # flake8-pytest-style
+    "RUF", # Ruff-specific rules
+]
+
+# Disable specific rules that might be too strict
+ignore = [
+    "E501",   # Line too long (handled by formatter)
+    "B008",   # Do not perform function calls in argument defaults
+    "N806",   # Variable in function should be lowercase (conflicts with Discord.py conventions)
+    "N813",   # Camelcase imported as lowercase
+    "UP007",  # Use X | Y for type annotations (not always preferred)
+]
+
+# Allow unused variables when they start with underscore
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
+
+[lint.per-file-ignores]
+# Allow unused imports in __init__.py files
+"__init__.py" = ["F401"]
+# Allow print statements and longer lines in scripts
+"scripts/*" = ["T201", "E501"]
+# More relaxed rules for tests
+"tests/*" = ["S101", "PLR2004", "PLR0913"]
+
+[lint.isort]
+# Import sorting configuration
+force-single-line = false
+combine-as-imports = true
+split-on-trailing-comma = true
+
+[lint.mccabe]
+# Maximum cyclomatic complexity
+max-complexity = 10
+
+[lint.pycodestyle]
+# Maximum number of arguments for function
+max-doc-length = 88
+
+[format]
+# Use double quotes for strings
+quote-style = "double"
+# Use spaces for indentation
+indent-style = "space"
+# Respect magic trailing comma
+skip-magic-trailing-comma = false
+# Automatically detect line ending
+line-ending = "auto"
+# Format docstrings
+docstring-code-format = true
