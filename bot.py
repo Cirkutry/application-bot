@@ -6,19 +6,17 @@ import os
 import pathlib
 import traceback
 
-import discord
-from discord import app_commands
 from dotenv import load_dotenv
 
-from application_components import (
-    ApplicationResponseView,
-    ApplicationStartView,
-    StaffApplicationSelect,
-    StaffApplicationView,
+import discord
+from discord import app_commands
+from question_manager import load_questions
+from src.core.discord_helpers import (
+    APPS_DIRECTORY,
     handle_dm_message,
     load_active_applications,
 )
-from question_manager import load_questions
+from src.discord.views.application_view import ApplicationResponseView
 
 # Get logger
 logger = logging.getLogger(__name__)
@@ -26,7 +24,6 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
-APPS_DIRECTORY = "storage/applications"
 
 # Create applications directory if it doesn't exist
 pathlib.Path(APPS_DIRECTORY).mkdir(exist_ok=True)
@@ -45,9 +42,7 @@ class ApplicationBot(discord.Client):
     async def setup_hook(self):
         # Restore any active views
         for user_id, app_data in self.active_applications.items():
-            if (
-                "start_time" not in app_data
-            ):  # Only restore views for applications that haven't started
+            if "start_time" not in app_data:  # Only restore views for applications that haven't started
                 try:
                     logger.info(f"Attempting to restore view for user {user_id}")
 
@@ -97,27 +92,18 @@ class ApplicationBot(discord.Client):
             return
 
         # Check if this is a DM and if the user has an active application
-        if (
-            isinstance(message.channel, discord.DMChannel)
-            and str(message.author.id) in self.active_applications
-        ):
+        if isinstance(message.channel, discord.DMChannel) and str(message.author.id) in self.active_applications:
             app_data = self.active_applications[str(message.author.id)]
-            logger.info(
-                f"Found active application for {message.author.name}: {app_data}"
-            )
+            logger.info(f"Found active application for {message.author.name}: {app_data}")
 
             # If the application is being processed, ignore this message
             if app_data.get("processing", False):
-                logger.info(
-                    f"Message from {message.author.name} ignored - application is being processed"
-                )
+                logger.info(f"Message from {message.author.name} ignored - application is being processed")
                 return
 
             # Set processing flag
             app_data["processing"] = True
-            logger.info(
-                f"Processing message from {message.author.name}: {message.content}"
-            )
+            logger.info(f"Processing message from {message.author.name}: {message.content}")
 
             try:
                 # Get the current question index
@@ -141,12 +127,8 @@ class ApplicationBot(discord.Client):
                         # Add a delay to ensure messages are processed in order
                         await asyncio.sleep(1)
                         try:
-                            await message.channel.send(
-                                f"**Question {next_q_index + 1}:** {next_question}"
-                            )
-                            logger.info(
-                                f"Successfully sent question {next_q_index + 1}"
-                            )
+                            await message.channel.send(f"**Question {next_q_index + 1}:** {next_question}")
+                            logger.info(f"Successfully sent question {next_q_index + 1}")
                         except Exception as e:
                             logger.error(f"Error sending next question: {e}")
                             logger.error(f"Error type: {type(e)}")
@@ -165,17 +147,13 @@ class ApplicationBot(discord.Client):
                 logger.error(f"Error type: {type(e)}")
                 logger.error(f"Error traceback: {traceback.format_exc()}")
                 try:
-                    await message.channel.send(
-                        "Sorry, there was an error processing your answer. Please try again."
-                    )
+                    await message.channel.send("Sorry, there was an error processing your answer. Please try again.")
                 except Exception:
                     pass
             finally:
                 # Clear processing flag
                 if str(message.author.id) in self.active_applications:
-                    self.active_applications[str(message.author.id)]["processing"] = (
-                        False
-                    )
+                    self.active_applications[str(message.author.id)]["processing"] = False
                 logger.info(f"Finished processing message from {message.author.name}")
 
             return
@@ -189,9 +167,7 @@ class ApplicationBot(discord.Client):
         # Format questions and answers
         qa_pairs = []
         for i in range(len(app_data["questions"])):
-            qa_pairs.append(
-                {"question": app_data["questions"][i], "answer": app_data["answers"][i]}
-            )
+            qa_pairs.append({"question": app_data["questions"][i], "answer": app_data["answers"][i]})
 
         # Create the final application data
         final_app_data = {
@@ -203,9 +179,7 @@ class ApplicationBot(discord.Client):
         }
 
         # Generate application ID
-        app_id = (
-            f"{message.author.id}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
-        )
+        app_id = f"{message.author.id}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
 
         # Save application
         json_path = os.path.join(APPS_DIRECTORY, f"{app_id}.json")
@@ -231,11 +205,7 @@ class ApplicationBot(discord.Client):
             if log_channel:
                 # Create ping string for roles
                 ping_roles = position_settings.get("ping_roles", [])
-                ping_string = (
-                    " ".join([f"<@&{role_id}>" for role_id in ping_roles])
-                    if ping_roles
-                    else ""
-                )
+                ping_string = " ".join([f"<@&{role_id}>" for role_id in ping_roles]) if ping_roles else ""
 
                 embed = discord.Embed(
                     title="New Application Received",
@@ -244,7 +214,9 @@ class ApplicationBot(discord.Client):
                 )
                 embed.add_field(name="Application ID", value=app_id)
                 # Add masked link to application
-                web_url = f"http://{os.getenv('WEB_HOST', 'localhost')}:{os.getenv('WEB_PORT', '8080')}/application/{app_id}"
+                web_url = (
+                    f"http://{os.getenv('WEB_HOST', 'localhost')}:{os.getenv('WEB_PORT', '8080')}/application/{app_id}"
+                )
 
                 # Replace with WEB_EXTERNAL if it's set
                 web_external = os.getenv("WEB_EXTERNAL")
@@ -258,15 +230,11 @@ class ApplicationBot(discord.Client):
                 )
 
                 # Create and register view with the bot - single clean way
-                view = ApplicationResponseView(app_id, app_data["position"]).set_bot(
-                    self
-                )
+                view = ApplicationResponseView(app_id, app_data["position"]).set_bot(self)
 
                 # Send message with ping roles if any are set
                 if ping_string:
-                    log_message = await log_channel.send(
-                        ping_string, embed=embed, view=view
-                    )
+                    log_message = await log_channel.send(ping_string, embed=embed, view=view)
                 else:
                     log_message = await log_channel.send(embed=embed, view=view)
 
@@ -274,18 +242,14 @@ class ApplicationBot(discord.Client):
                 if position_settings.get("auto_thread", False):
                     try:
                         thread_name = f"{app_data['position']} - {message.author.name}"
-                        await log_message.create_thread(
-                            name=thread_name, auto_archive_duration=1440
-                        )
+                        await log_message.create_thread(name=thread_name, auto_archive_duration=1440)
                     except Exception as e:
                         logger.error(f"Error creating thread: {e}")
 
         # Remove the active application
         if str(message.author.id) in self.active_applications:
             del self.active_applications[str(message.author.id)]
-        logger.info(
-            f"Application for {message.author.name} submitted and removed from active applications"
-        )
+        logger.info(f"Application for {message.author.name} submitted and removed from active applications")
 
 
 # Create bot instance
@@ -293,9 +257,7 @@ bot = ApplicationBot()
 
 
 # Add commands
-@bot.tree.command(
-    name="setup_applications", description="Set up the staff application system"
-)
+@bot.tree.command(name="setup_applications", description="Set up the staff application system")
 @app_commands.default_permissions(administrator=True)
 async def setup_applications(interaction: discord.Interaction):
     embed = discord.Embed(

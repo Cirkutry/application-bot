@@ -15,12 +15,14 @@ load_dotenv()
 pathlib.Path("storage").mkdir(exist_ok=True)
 QUESTIONS_FILE = "storage/questions.json"
 
+# TODO: Refactor this to work with database
+
 
 def load_questions():
     if not os.path.exists(QUESTIONS_FILE):
         return {}
 
-    with open(QUESTIONS_FILE, "r") as f:
+    with open(QUESTIONS_FILE) as f:
         data = json.load(f)
         # Convert old format to new format if needed
         if isinstance(data, dict) and all(isinstance(v, list) for v in data.values()):

@@ -5,8 +5,9 @@ import pathlib
 import traceback
 import uuid
 
-import discord
 from dotenv import load_dotenv
+
+import discord
 
 # Get logger
 logger = logging.getLogger(__name__)
@@ -50,7 +51,7 @@ def save_panels(panels):
 
 
 async def register_panels(bot):
-    from application_components import StaffApplicationView
+    from src.discord.views.selects import StaffApplicationView
 
     panels = load_panels()
 
@@ -90,9 +91,7 @@ async def register_panels(bot):
 
             # Store the view in the bot's views dictionary with both panel_id and message_id
             bot.views[panel_id] = view
-            bot.views[str(message.id)] = (
-                view  # Also store by message ID for faster lookup
-            )
+            bot.views[str(message.id)] = view  # Also store by message ID for faster lookup
 
             # Register the view with the bot and message ID
             bot.add_view(view, message_id=message.id)
@@ -107,15 +106,13 @@ async def register_panels(bot):
 
 
 async def create_panel(bot, channel_id, positions, embed_data):
-    from application_components import StaffApplicationView
+    from src.discord.views.selects import StaffApplicationView
 
     try:
         # Create the embed
         embed = discord.Embed(
             title=embed_data.get("title", "Staff Applications"),
-            description=embed_data.get(
-                "description", "Select a position below to apply!"
-            ),
+            description=embed_data.get("description", "Select a position below to apply!"),
             color=int(embed_data.get("color", "0x3498db").replace("0x", ""), 16),
         )
 

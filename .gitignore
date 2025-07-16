@@ -2,6 +2,7 @@
 storage/
 __pycache__
 .env
+.vscode/
 
 
 # Byte-compiled / optimized / DLL files

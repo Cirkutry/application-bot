@@ -7,25 +7,27 @@ import signal
 import sys
 from logging.handlers import RotatingFileHandler
 
-import discord
-from discord.ext import commands
 from dotenv import load_dotenv
 
-from webserver import start_web_server
+import discord
+from discord.ext import commands
+from src.web.server import start_web_server
 
 COLOR = "\033[38;2;243;221;182m"
 RESET = "\033[0m"
 
 # Print startup logo
 print(f"{COLOR}")
-print("""
+print(
+    """
             ███████╗ █████╗ ██████╗ 
             ██╔════╝██╔══██╗██╔══██╗
             ███████╗███████║██████╔╝
             ╚════██║██╔══██║██╔══██╗
             ███████║██║  ██║██████╔╝
             ╚══════╝╚═╝  ╚═╝╚═════╝ 
-""")
+"""
+)
 print(f"Simple Applications Bot by Kre0lidge - Starting up...\n{RESET}")
 
 # Get logger
@@ -56,9 +58,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        RotatingFileHandler(
-            "storage/logs/bot.log", maxBytes=1024 * 1024, backupCount=5
-        ),
+        RotatingFileHandler("storage/logs/bot.log", maxBytes=1024 * 1024, backupCount=5),
         logging.StreamHandler(),
     ],
 )
@@ -168,9 +168,7 @@ async def main():
             custom_id = interaction.data.get("custom_id", "")
 
             # Check if this is a start or cancel application button from DMs
-            if custom_id.startswith("app_welcome_") and isinstance(
-                interaction.channel, discord.DMChannel
-            ):
+            if custom_id.startswith("app_welcome_") and isinstance(interaction.channel, discord.DMChannel):
                 # Extract the action, user_id the custom_id
                 parts = custom_id.split("_")
                 if len(parts) >= 4:
@@ -180,7 +178,7 @@ async def main():
 
                     # Check if user has an active application
                     if not hasattr(bot, "active_applications"):
-                        from application_components import load_active_applications
+                        from src.core.discord_helpers import load_active_applications
 
                         bot.active_applications = load_active_applications()
 
@@ -191,20 +189,13 @@ async def main():
                         )
 
                         # Create a new application view first
-                        view = ApplicationStartView(
-                            bot, bot.active_applications[user_id]
-                        )
+                        view = ApplicationStartView(bot, bot.active_applications[user_id])
 
                         if action == "start" and len(view.children) > 0:
                             # Get the start button from the view
-                            start_button = view.children[
-                                0
-                            ]  # First child is the start button
+                            start_button = view.children[0]  # First child is the start button
                             # Ensure it's the correct button type
-                            if (
-                                isinstance(start_button, ApplicationStartButton)
-                                and start_button.action == "start"
-                            ):
+                            if isinstance(start_button, ApplicationStartButton) and start_button.action == "start":
                                 await start_button.callback(interaction)
                             else:
                                 await interaction.response.send_message(
@@ -213,14 +204,9 @@ async def main():
                                 )
                         elif action == "cancel" and len(view.children) > 1:
                             # Get the cancel button from the view
-                            cancel_button = view.children[
-                                1
-                            ]  # Second child is the cancel button
+                            cancel_button = view.children[1]  # Second child is the cancel button
                             # Ensure it's the correct button type
-                            if (
-                                isinstance(cancel_button, ApplicationStartButton)
-                                and cancel_button.action == "cancel"
-                            ):
+                            if isinstance(cancel_button, ApplicationStartButton) and cancel_button.action == "cancel":
                                 await cancel_button.callback(interaction)
                             else:
                                 await interaction.response.send_message(
@@ -258,7 +244,7 @@ async def main():
 
         # Handle DM messages
         if message.guild is None:  # This is a DM
-            from application_components import handle_dm_message
+            from src.core.discord_helpers import handle_dm_message
 
             await handle_dm_message(bot, message)
 
@@ -269,7 +255,7 @@ async def main():
         server_name = server.name if server else "Unknown Server"
 
         # Load active applications
-        from application_components import load_active_applications
+        from src.core.discord_helpers import load_active_applications
 
         bot.active_applications = load_active_applications()
         logging.info(f"Loaded {len(bot.active_applications)} active applications")
@@ -282,7 +268,7 @@ async def main():
 
         # Register persistent application response views for existing log embeds
         try:
-            from application_components import ApplicationResponseView
+            from src.discord.views.application_view import ApplicationResponseView
 
             count = 0
             # Get all applications from the APPS_DIRECTORY
@@ -329,9 +315,7 @@ async def main():
         try:
             await bot.start(TOKEN)
         except discord.PrivilegedIntentsRequired:
-            logging.error(
-                "Required Privileged Gateway Intents are disabled for this bot."
-            )
+            logging.error("Required Privileged Gateway Intents are disabled for this bot.")
             logging.error(
                 "Make sure Server Members and Message Content intents are enabled in the Discord Developer Portal."
             )
