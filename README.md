@@ -21,23 +21,21 @@ At it's current iteration each running instance of the bot only supports managin
 
 ## Preview!
 
-	<details closed>
-	  <summary>Dashboard</summary>
-	
-	  ![Dash-1](preview/dash-preview-1.png)
-	  ![Dash-2](preview/dash-preview-2.png)
-	  ![Dash-3](preview/dash-preview-3.png)
-	  ![Dash-4](preview/dash-preview-4.png)
-	
-	</details>
+<details>
+  <summary>Dashboard</summary>
 
-	<details closed>
-	  <summary>Bot</summary>
-	
-	  ![DM-Flow](preview/dm-preview.png)
-	  ![Log-Embed](preview/embed-preview.png)
-	
-	</details>
+  <img src="preview/dash-preview-1.png" alt="Dash 1">
+  <img src="preview/dash-preview-2.png" alt="Dash 2">
+  <img src="preview/dash-preview-3.png" alt="Dash 3">
+  <img src="preview/dash-preview-4.png" alt="Dash 4">
+</details>
+
+<details>
+  <summary>Bot</summary>
+
+  <img src="preview/embed-preview.png" alt="Log Embed">
+  <img src="preview/dm-preview.png" alt="DM Flow">
+</details>
 
 ## Installation
 
