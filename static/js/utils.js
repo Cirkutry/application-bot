@@ -107,35 +107,6 @@ function updateStatus(applicationId, status) {
     });
 }
 
-/**
- * Updates the viewer roles configuration
- * @param {string[]} selectedRoles - Array of selected role IDs
- * @returns {Promise} Promise that resolves when the update is complete
- */
-function saveViewerRoles() {
-    const selectedRoles = $('#viewerRoles').val() || [];
-    
-    return fetch('/api/viewer-roles/update', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ roles: selectedRoles })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showToast('Viewer roles updated successfully', 'success');
-        } else {
-            showToast(data.error || 'Failed to update viewer roles', 'danger');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('Failed to update viewer roles', 'danger');
-    });
-}
-
 function initializeSidebar() {
     const hamburger = document.querySelector('.hamburger-menu');
     const sidebar = document.querySelector('.sidebar');

@@ -1093,6 +1093,61 @@ h6 {
     background: #555;
 }
 
+/* Stat cards */
+.stat-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.stat-icon.bg-primary {
+    background-color: #8190a0 !important;
+}
+
+.stat-icon.bg-success {
+    background-color: #8bdb89de !important;
+}
+
+.stat-icon.bg-danger {
+    background-color: #db838c !important;
+}
+
+.stat-icon.bg-info {
+    background-color: #8188d1 !important;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
 .table {
     --bs-table-bg: var(--bg-card);
 }
@@ -1111,8 +1166,7 @@ h6 {
 
 .table-responsive {
     background-color: var(--bg-card);
-    border-top-right-radius: 0.5rem !important;
-    border-top-left-radius: 0.5rem !important;
+    border-radius: 0.5rem !important;
 }
 
 .sidebar-footer {
@@ -1146,7 +1200,7 @@ h6 {
     background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !important;
   }
 
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
     html, body {
         height: 100%;
         overflow: hidden;
@@ -1169,11 +1223,11 @@ h6 {
         width: var(--sidebar-width);
         height: 100%;
     }
-    
+
     .sidebar.active {
         transform: translateX(0);
     }
-    
+
     .main-content {
         margin-left: 0;
         padding-top: 1rem;
@@ -1185,12 +1239,57 @@ h6 {
     .position-actions {
         gap: 4px;
     }
-    
+
     .position-actions .btn {
         padding: 6px 12px;
         font-size: 0.9em;
     }
-}   
+
+    /* Header buttons below title */
+    .header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .header > div {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .header h1 {
+        margin-bottom: 0;
+    }
+
+    .btn-group {
+        flex: 1;
+    }
+
+    /* Position card layout fixes for mobile */
+    .position-header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .position-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .position-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .position-actions .btn {
+        flex: 1 1 auto;
+    }
+}
 
 .hamburger-menu {
     display: none;
@@ -1213,4 +1312,10 @@ h6 {
 
 .hamburger-menu:hover {
     color: var(--primary-color);
+}
+
+:focus,
+.focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
 }

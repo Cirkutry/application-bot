@@ -39,6 +39,7 @@ def load_questions():
                     "ping_roles": [],
                     "accepted_removal_roles": [],
                     "denied_removal_roles": [],
+                    "viewer_roles": [],
                     "time_limit": 60,
                 }
             save_questions(new_data)
@@ -118,6 +119,7 @@ def add_position(position, copy_from=None):
             "ping_roles": [],
             "accepted_removal_roles": [],
             "denied_removal_roles": [],
+            "viewer_roles": [],
             "auto_thread": False,
             "time_limit": 60,
         }

@@ -35,16 +35,19 @@
     <div class="sidebar">
         <div class="sidebar-header">
             <div class="user-info">
-                {% if user.avatar %}
-                <img src="{{ user.avatar }}" alt="{{ user.name }}">
+                {% if user and user.avatar %}
+                <img src="{{ user.avatar }}" alt="{{ user.name or 'User' }}">
                 {% endif %}
                 <div>
-                    <strong>{{ user.name }}</strong><br>
+                    <strong>{{ user.name or 'Guest' }}</strong><br>
+                    {% if not is_403 %}
                     <small class="text">{% if is_admin %}Admin{% else %}Viewer{% endif %}</small>
+                    {% endif %}
                 </div>
             </div>
         </div>
         <nav class="nav flex-column">
+            {% if not is_403 %}
             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
                 <i class="fas fa-home fa-fw"></i> Dashboard
             </a>
@@ -58,6 +61,7 @@
             <a class="nav-link {% if request.path == '/panel-creator' %}active{% endif %}" href="/panel-creator">
                 <i class="fas fa-plus fa-fw"></i> Panel Creator
             </a>
+            {% endif %}
             {% endif %}
             <a class="nav-link" href="/auth/logout">
                 <i class="fas fa-sign-out-alt fa-fw"></i> Logout
@@ -81,7 +85,7 @@
     <!-- Core JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.9/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
     <script src="/static/js/utils.js"></script>
     {% block extra_js %}{% endblock %}
 </body>

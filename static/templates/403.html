@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}403 - Access Denied{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1>Access Denied</h1>
+</div>
+
+<div class="container text-center mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h1 class="display-1">403</h1>
+                    {% if context == "specific_application" %}
+                        <p class="lead mb-4">You don't have permission to view this application! You can only view applications for positions where you have viewer role access.</p>
+                        <div class="d-flex">
+                        <a href="/applications" class="btn btn-primary me-2">Back to Applications</a>
+                        <a href="/auth/logout" class="btn btn-outline-secondary">Login with Different Account</a>
+                        </div>
+                    {% elif context == "admin_required" %}
+                        <p class="lead mb-4">Administrator access required!</p>
+                        <div class="d-flex">
+                        <a href="/" class="btn btn-primary me-2">Back to Dashboard</a>
+                        <a href="/auth/logout" class="btn btn-outline-secondary">Login with Different Account</a>
+                        </div>
+                    {% elif context == "no_positions" %}
+                        <p class="lead mb-4">You don't have access to any applications! You need viewer role access for at least one position to view applications.</p>
+                        <div class="d-flex">
+                        <a href="/" class="btn btn-primary me-2">Back to Dashboard</a>
+                        <a href="/auth/logout" class="btn btn-outline-secondary">Login with Different Account</a>
+                        </div>
+                    {% else %}
+                        <!-- Default/general case - usually from OAuth callback -->
+                        <p class="lead mb-4">You must be an administrator or have a viewer role for at least one position to access this dashboard!</p>
+                        <a href="/auth/logout" class="btn btn-primary">Login with Different Account</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

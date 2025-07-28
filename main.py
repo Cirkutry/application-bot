@@ -39,7 +39,7 @@ def ensure_directories():
         pathlib.Path(directory).mkdir(exist_ok=True)
 
     # Create empty files if they don't exist
-    files = [("storage/viewer_roles.json", "[]"), ("storage/questions.json", "{}")]
+    files = [("storage/questions.json", "{}")]
 
     for file_path, default_content in files:
         if not os.path.exists(file_path):

@@ -106,7 +106,6 @@ def auth_required(handler):
         # Set user permissions
         request["user_permissions"] = {
             "is_admin": is_admin,
-            "viewer_roles": [],  # Will be populated in the index route
         }
 
         return await handler(request)
@@ -117,8 +116,12 @@ def auth_required(handler):
 # Authentication middleware
 @web.middleware
 async def auth_middleware(request, handler):
-    # Allow public routes
-    if request.path in ["/auth/login", "/auth/callback", "/auth/logout"]:
+    # Allow public routes and static files
+    if request.path in [
+        "/auth/login",
+        "/auth/callback",
+        "/auth/logout",
+    ] or request.path.startswith("/static/"):
         return await handler(request)
 
     # Check session
@@ -145,7 +148,6 @@ async def auth_middleware(request, handler):
     # Set user permissions
     request["user_permissions"] = {
         "is_admin": is_admin,
-        "viewer_roles": [],  # Will be populated in the index route
     }
 
     # Check admin-only routes
@@ -160,7 +162,7 @@ async def auth_middleware(request, handler):
         "/api/questions/update",
     ]
     if not is_admin and request.path in admin_routes:
-        return web.Response(text="Admin access required", status=403)
+        return await handle_403(request, "admin_required")
 
     return await handler(request)
 
@@ -195,6 +197,46 @@ async def handle_404(request):
     )
 
 
+async def handle_403(request, context="general"):
+    # Get server info for the template
+    server_info = await get_server_info()
+
+    # Try to get user info from the request (for logged-in users)
+    user_info = {"name": "Guest", "avatar": None, "id": None}
+    is_admin = False
+
+    # Check if we have a logged-in user
+    if "user" in request and "user_id" in request["user"]:
+        user_info = await get_user_info(request["user"]["user_id"])
+        is_admin = request.get("user_permissions", {}).get("is_admin", False)
+    # Check if we have user data from OAuth callback context
+    elif hasattr(request, "_user_data"):
+        user_data = request._user_data
+        server = bot.get_guild(int(SERVER_ID))
+        if server:
+            member = server.get_member(int(user_data["id"]))
+            if member:
+                user_info = {
+                    "name": member.name,
+                    "avatar": member.display_avatar.url
+                    if member.display_avatar
+                    else None,
+                    "id": str(member.id),
+                }
+
+    return aiohttp_jinja2.render_template(
+        "403.html",
+        request,
+        {
+            "user": user_info,
+            "is_admin": is_admin,
+            "server": server_info,
+            "is_403": True,  # Add flag to identify 403 state
+            "context": context,  # Pass context to differentiate error types
+        },
+    )
+
+
 async def get_session(request):
     session_id = request.cookies.get("session_id")
     if not session_id or session_id not in sessions:
@@ -220,12 +262,32 @@ async def get_user_info(user_id):
     }
 
 
-async def load_viewer_roles():
-    try:
-        with open("storage/viewer_roles.json", "r") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
+def has_position_viewer_access(member, position_data):
+    if not member:
+        return False
+
+    if member.guild_permissions.administrator:
+        return True
+
+    viewer_roles = position_data.get("viewer_roles", [])
+    member_role_ids = [str(role.id) for role in member.roles]
+
+    return any(role_id in member_role_ids for role_id in viewer_roles)
+
+
+def get_accessible_positions(member, all_positions):
+    if not member:
+        return {}
+
+    if member.guild_permissions.administrator:
+        return all_positions
+
+    accessible_positions = {}
+    for position, data in all_positions.items():
+        if has_position_viewer_access(member, data):
+            accessible_positions[position] = data
+
+    return accessible_positions
 
 
 async def get_application_stats():
@@ -339,26 +401,24 @@ async def auth_callback(request):
                 if not member:
                     return web.Response(text="User not found in server", status=404)
 
-                # Check if user has ADMINISTRATOR permission or a viewer role
+                # Check if user has ADMINISTRATOR permission or any position viewer role
                 is_admin = member.guild_permissions.administrator
 
-                # Get viewer roles
-                viewer_roles = await load_viewer_roles()
-                has_viewer_role = False
+                # Get all positions to check for any viewer role access
+                all_positions = load_questions()
+                has_any_viewer_access = False
 
-                # Check if user has any viewer role
-                for role_id in viewer_roles:
-                    role = discord.utils.get(member.roles, id=int(role_id))
-                    if role:
-                        has_viewer_role = True
+                # Check if user has viewer access to any position
+                for position_data in all_positions.values():
+                    if has_position_viewer_access(member, position_data):
+                        has_any_viewer_access = True
                         break
 
-                # Allow access if user is admin or has viewer role
-                if not is_admin and not has_viewer_role:
-                    return web.Response(
-                        text="You must be an administrator or have a viewer role to access this dashboard",
-                        status=403,
-                    )
+                # Allow access if user is admin or has viewer role for any position
+                if not is_admin and not has_any_viewer_access:
+                    # Store user data for the 403 handler
+                    request._user_data = user_data
+                    return await handle_403(request)
 
                 # Create session
                 session_id = secrets.token_urlsafe(32)
@@ -430,9 +490,6 @@ async def index(request):
         if role.name != "@everyone" and not role.managed
     ]
 
-    # Get current viewer roles
-    viewer_roles = await load_viewer_roles()
-
     return aiohttp_jinja2.render_template(
         "index.html",
         request,
@@ -443,7 +500,6 @@ async def index(request):
             "positions": positions,
             "panels": panels,
             "roles": roles,
-            "viewer_roles": viewer_roles,
             "is_admin": request["user_permissions"]["is_admin"],
         },
     )
@@ -456,31 +512,25 @@ async def applications(request):
     user = request["user"]
     user_permissions = request["user_permissions"]
 
-    # Check if user is admin or has viewer role
+    # Check if user is admin
     is_admin = user_permissions.get("is_admin", False)
-    has_viewer_role = False
-
-    # Get viewer roles
-    viewer_roles = await load_viewer_roles()
 
     # Get server and member
     server = bot.get_guild(int(SERVER_ID))
-    if server:
-        member = server.get_member(int(user["user_id"]))
-        if member:
-            # Check if the user has any of the viewer roles
-            for role_id in viewer_roles:
-                role = discord.utils.get(member.roles, id=int(role_id))
-                if role:
-                    has_viewer_role = True
-                    break
+    if not server:
+        return web.Response(text="Server not found", status=404)
 
-    # If user is not admin and doesn't have viewer role, return access denied
-    if not is_admin and not has_viewer_role:
-        return web.Response(
-            text="Access denied: You don't have permission to view applications",
-            status=403,
-        )
+    member = server.get_member(int(user["user_id"]))
+    if not member:
+        return web.Response(text="User not found in server", status=404)
+
+    # Get all positions to check permissions
+    all_positions = load_questions()
+    accessible_positions = get_accessible_positions(member, all_positions)
+
+    # If user has no accessible positions and is not admin, deny access
+    if not accessible_positions and not is_admin:
+        return await handle_403(request, "no_positions")
 
     # Get query parameters
     status = request.query.get("status")
@@ -491,6 +541,14 @@ async def applications(request):
 
     # Load applications
     all_applications = await load_applications()
+
+    # Filter applications by accessible positions (unless admin)
+    if not is_admin:
+        all_applications = [
+            app
+            for app in all_applications
+            if app.get("position") in accessible_positions
+        ]
 
     # Filter by status if specified
     if status:
@@ -574,7 +632,9 @@ async def applications(request):
         "page": page,
         "positions": positions,
         "is_admin": is_admin,
-        "has_viewer_role": has_viewer_role,
+        "accessible_positions": (
+            list(accessible_positions.keys()) if not is_admin else positions
+        ),
         "server": server_info,
         "user": user_info,  # Pass the full user info object for the template
     }
@@ -639,32 +699,6 @@ async def application(request):
     user = request["user"]
     user_permissions = request["user_permissions"]
 
-    # Check if user is admin or has viewer role
-    is_admin = user_permissions.get("is_admin", False)
-    has_viewer_role = False
-
-    # Get viewer roles
-    viewer_roles = await load_viewer_roles()
-
-    # Get server and member
-    server = bot.get_guild(int(SERVER_ID))
-    if server:
-        member = server.get_member(int(user["user_id"]))
-        if member:
-            # Check if the user has any of the viewer roles
-            for role_id in viewer_roles:
-                role = discord.utils.get(member.roles, id=int(role_id))
-                if role:
-                    has_viewer_role = True
-                    break
-
-    # If user is not admin and doesn't have viewer role, return access denied
-    if not is_admin and not has_viewer_role:
-        return web.Response(
-            text="Access denied: You don't have permission to view this application",
-            status=403,
-        )
-
     # Get application ID from URL
     application_id = request.match_info["id"]
 
@@ -678,6 +712,31 @@ async def application(request):
             application = json.load(f)
     except Exception:
         return web.Response(text="Failed to load application", status=500)
+
+    # Check if user is admin
+    is_admin = user_permissions.get("is_admin", False)
+
+    # Get server and member
+    server = bot.get_guild(int(SERVER_ID))
+    if not server:
+        return web.Response(text="Server not found", status=404)
+
+    member = server.get_member(int(user["user_id"]))
+    if not member:
+        return web.Response(text="User not found in server", status=404)
+
+    # Get position data to check viewer permissions
+    all_positions = load_questions()
+    app_position = application.get("position")
+
+    if not app_position or app_position not in all_positions:
+        return web.Response(text="Application position not found", status=404)
+
+    # Check if user has access to this position's applications
+    if not is_admin and not has_position_viewer_access(
+        member, all_positions[app_position]
+    ):
+        return await handle_403(request, "specific_application")
 
     # Set status color
     status = application.get("status", "pending").lower()
@@ -953,9 +1012,9 @@ async def create_panel(request):
             embed.set_author(
                 name=data["author"]["name"],
                 url=data["author"]["url"] if data["author"]["url"] else None,
-                icon_url=data["author"]["icon_url"]
-                if data["author"]["icon_url"]
-                else None,
+                icon_url=(
+                    data["author"]["icon_url"] if data["author"]["icon_url"] else None
+                ),
             )
 
         # Set thumbnail if provided
@@ -970,9 +1029,9 @@ async def create_panel(request):
         if data["footer"]["text"]:
             embed.set_footer(
                 text=data["footer"]["text"],
-                icon_url=data["footer"]["icon_url"]
-                if data["footer"]["icon_url"]
-                else None,
+                icon_url=(
+                    data["footer"]["icon_url"] if data["footer"]["icon_url"] else None
+                ),
             )
 
         # Create the select menu
@@ -1060,85 +1119,6 @@ async def update_application_status(request):
         return web.json_response({"success": False, "error": str(e)}, status=500)
 
 
-@routes.get("/api/viewer-roles")
-@auth_required
-async def get_viewer_roles(request):
-    # Check if user is admin
-    if not request["user_permissions"]["is_admin"]:
-        return web.json_response(
-            {"success": False, "error": "Admin privileges required"}, status=403
-        )
-
-    # Get viewer roles
-    viewer_roles = await load_viewer_roles()
-
-    # Get server roles
-    server = bot.get_guild(int(SERVER_ID))
-    if not server:
-        return web.json_response(
-            {"success": False, "error": "Server not found"}, status=404
-        )
-
-    # Format server roles
-    server_roles = []
-    for role in server.roles:
-        if role.name != "@everyone" and not role.managed:
-            server_roles.append(
-                {
-                    "id": str(role.id),
-                    "name": role.name,
-                    "color": f"#{role.color.value:06x}"
-                    if role.color.value
-                    else "#99AAB5",
-                    "is_viewer": str(role.id) in viewer_roles,
-                }
-            )
-
-    # Sort roles by position
-    server_roles.sort(key=lambda r: r["name"])
-
-    return web.json_response(
-        {"success": True, "roles": server_roles, "viewer_roles": viewer_roles}
-    )
-
-
-@routes.post("/api/viewer-roles/update")
-@auth_required
-async def update_viewer_roles(request):
-    # Check if user is admin
-    if not request["user_permissions"]["is_admin"]:
-        return web.json_response(
-            {"success": False, "error": "Admin privileges required"}, status=403
-        )
-
-    try:
-        data = await request.json()
-        viewer_roles = data.get("roles", [])
-
-        # Validate role IDs
-        server = bot.get_guild(int(SERVER_ID))
-        if not server:
-            return web.json_response(
-                {"success": False, "error": "Server not found"}, status=404
-            )
-
-        server_role_ids = [str(role.id) for role in server.roles]
-        for role_id in viewer_roles:
-            if role_id not in server_role_ids:
-                return web.json_response(
-                    {"success": False, "error": f"Invalid role ID: {role_id}"},
-                    status=400,
-                )
-
-        # Save viewer roles
-        with open("storage/viewer_roles.json", "w") as f:
-            json.dump(viewer_roles, f)
-
-        return web.json_response({"success": True})
-    except Exception as e:
-        return web.json_response({"success": False, "error": str(e)}, status=500)
-
-
 @routes.post("/api/questions/position/update")
 @auth_required
 async def update_position(request):
@@ -1208,6 +1188,7 @@ async def update_position(request):
                 "required_roles": settings.get("required_roles", []),
                 "accepted_removal_roles": settings.get("accepted_removal_roles", []),
                 "denied_removal_roles": settings.get("denied_removal_roles", []),
+                "viewer_roles": settings.get("viewer_roles", []),
                 "auto_thread": settings.get("auto_thread", False),
                 "time_limit": settings.get("time_limit", 60),
             }

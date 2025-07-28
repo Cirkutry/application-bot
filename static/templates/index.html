@@ -19,34 +19,61 @@
 </div>
 
 <div class="row">
-    <!-- Viewer Role Management (Admin Only) -->
-    {% if is_admin %}
-    <div class="col-lg-4 col-md-12 mb-4">
+    <!-- Application Statistics -->
+    <div class="col-lg-12 col-md-12 mb-4">
         <div class="card h-100">
             <div class="card-header">
-                <h5 class="card-title mb-0">Viewer Role Management</h5>
+                <h5 class="card-title mb-0">Application Statistics</h5>
             </div>
             <div class="card-body">
-                <p>Roles set here will be able to view applications but not modify them.</p>
-                
-                <div class="form-group">
-                    <select class="form-control" id="viewerRoles" multiple>
-                        {% for role in roles %}
-                        <option value="{{ role.id }}" {% if role.id in viewer_roles %}selected{% endif %}>
-                            {{ role.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="d-grid mt-3">
-                    <button id="save-roles" class="btn btn-primary" onclick="saveViewerRoles()">
-                        <i class="fas fa-save me-1"></i> Save Changes
-                    </button>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-primary">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-label">Pending</div>
+                                <div class="stat-value">{{ stats.pending }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-success">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-label">Approved</div>
+                                <div class="stat-value">{{ stats.approved }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-danger">
+                                <i class="fas fa-times"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-label">Rejected</div>
+                                <div class="stat-value">{{ stats.rejected }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-info">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-label">Total</div>
+                                <div class="stat-value">{{ stats.total }}</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    {% endif %}
 </div>
 {% endblock %}

@@ -180,6 +180,14 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="viewerRoles">Viewer Roles</label>
+                        <select class="form-control" id="viewerRoles" multiple>
+                            {% for role in roles %}
+                            <option value="{{ role.id }}">{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="acceptedRemovalRoles">Accepted Removal Roles</label>
                         <select class="form-control" id="acceptedRemovalRoles" multiple>
                             {% for role in roles %}
@@ -259,7 +267,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <script src="/static/js/utils.js"></script>
 <script src="/static/js/positions.js"></script>
 {% endblock %}

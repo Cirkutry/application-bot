@@ -82,6 +82,7 @@ async function submitEditPosition(event) {
         accepted_roles: Array.from(document.getElementById('acceptedRoles').selectedOptions).map(option => option.value),
         denied_roles: Array.from(document.getElementById('deniedRoles').selectedOptions).map(option => option.value),
         ping_roles: Array.from(document.getElementById('pingRoles').selectedOptions).map(option => option.value),
+        viewer_roles: Array.from(document.getElementById('viewerRoles').selectedOptions).map(option => option.value),
         accepted_removal_roles: Array.from(document.getElementById('acceptedRemovalRoles').selectedOptions).map(option => option.value),
         denied_removal_roles: Array.from(document.getElementById('deniedRemovalRoles').selectedOptions).map(option => option.value),
         time_limit: parseInt(document.getElementById('timeLimit').value) || 60,
@@ -228,6 +229,7 @@ function openEditPositionModal(button) {
         'acceptedRoles',
         'deniedRoles',
         'pingRoles',
+        'viewerRoles',
         'acceptedRemovalRoles',
         'deniedRemovalRoles'
     ];
@@ -250,6 +252,8 @@ function openEditPositionModal(button) {
                 $(select).val(data['accept_reason_roles'] || []).trigger('change');
             } else if (selectId === 'rejectReasonRoles') {
                 $(select).val(data['reject_reason_roles'] || []).trigger('change');
+            } else if (selectId === 'viewerRoles') {
+                $(select).val(data['viewer_roles'] || []).trigger('change');
             } else {
                 $(select).val(data[selectId.replace('Roles', '_roles')] || []).trigger('change');
             }

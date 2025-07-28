@@ -259,6 +259,30 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Viewer Roles -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="viewerRolesHeading">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#viewerRolesCollapse" aria-expanded="false" aria-controls="viewerRolesCollapse">
+                            Viewer Permissions
+                        </button>
+                    </h2>
+                    <div id="viewerRolesCollapse" class="accordion-collapse collapse" aria-labelledby="viewerRolesHeading" data-bs-parent="#roleSettingsAccordion">
+                        <div class="accordion-body">
+                            <div class="form-group">
+                                <label for="viewerRoles">Viewer Roles</label>
+                                <select class="form-control" id="viewerRoles" multiple>
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if role.id in settings.viewer_roles %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text"><i class="fa-regular fa-circle-question"></i> Roles that will be able to view applications for this position (but not modify them). Admins always have access.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -314,7 +338,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <script src="/static/js/utils.js"></script>
 <script src="/static/js/positions.js"></script>
 {% endblock %}
