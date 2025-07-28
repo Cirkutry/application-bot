@@ -53,9 +53,18 @@
                             <div class="d-flex align-items-center">
                                 {% if app.user_avatar %}
                                 <img src="{{ app.user_avatar }}" alt="" class="table-avatar me-2">
+                                {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-2 table-avatar">
+                                    <i class="fas fa-user text-white" style="font-size: 12px;"></i>
+                                </div>
                                 {% endif %}
                                 <div>
-                                    <div class="fw-bold">{{ app.user_name }}</div>
+                                    <div class="fw-bold">
+                                        {{ app.user_name }}
+                                        {% if app.user_left_server %}
+                                        <span class="status-badge status-warning ms-1" style="font-size: 0.7em;">Left Server</span>
+                                        {% endif %}
+                                    </div>
                                     <small class="text"><i class="fas fa-id-card me-1"></i>{{ app.user_id }}</small>
                                 </div>
                             </div>

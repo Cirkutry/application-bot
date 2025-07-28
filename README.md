@@ -19,6 +19,26 @@ At it's current iteration each running instance of the bot only supports managin
 - **Web Dashboard**: Bot comes with a powerful yet simple internal dashboard to manage the various aspects of the bot!
 - **Thread Creation**: Automatically create threads to discuss applicants with your staff members!
 
+## Preview!
+
+	<details closed>
+	  <summary>Dashboard</summary>
+	
+	  ![Dash-1](preview/dash-preview-1.png)
+	  ![Dash-2](preview/dash-preview-2.png)
+	  ![Dash-3](preview/dash-preview-3.png)
+	  ![Dash-4](preview/dash-preview-4.png)
+	
+	</details>
+
+	<details closed>
+	  <summary>Bot</summary>
+	
+	  ![DM-Flow](preview/dm-preview.png)
+	  ![Log-Embed](preview/embed-preview.png)
+	
+	</details>
+
 ## Installation
 
 ## Bot setup
@@ -148,7 +168,7 @@ https://discord.com/oauth2/authorize?client_id=123456789&scope=bot
 Discord Developer Portal setup guide adapted from https://github.com/discord-tickets/docs
 
 ## License
-Simple Applications Bot is licensed under the [GPLv3 license](https://github.com/discord-tickets/bot/blob/main/LICENSE).
+Simple Applications Bot is licensed under the [GPLv3 license](https://github.com/Cirkutry/application-bot/blob/main/LICENSE).
 
 This is not an official Discord product. It is not affiliated with nor endorsed by Discord Inc.
 

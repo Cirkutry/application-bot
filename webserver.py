@@ -607,13 +607,16 @@ async def applications(request):
                     str(member.display_avatar.url) if member.display_avatar else None
                 )
                 app["user_name"] = member.name  # Use the current Discord username
+                app["user_left_server"] = False
             else:
                 # Fallback to stored username or "Unknown User" if member not found
                 app["user_avatar"] = None
-                app["user_name"] = app.get("username", "Unknown User")
+                app["user_name"] = app.get("user_name", "Unknown User")
+                app["user_left_server"] = True
         else:
             app["user_avatar"] = None
-            app["user_name"] = app.get("username", "Unknown User")
+            app["user_name"] = app.get("user_name", "Unknown User")
+            app["user_left_server"] = True
 
     # Get positions for filter dropdown
     questions = load_questions()
@@ -758,9 +761,16 @@ async def application(request):
                 str(member.display_avatar.url) if member.display_avatar else None
             )
             application["user_name"] = member.name
+            application["user_left_server"] = False
         else:
+            # User has left the server, use stored data
             application["user_avatar"] = None
             application["user_name"] = application.get("user_name", "Unknown User")
+            application["user_left_server"] = True
+    else:
+        application["user_avatar"] = None
+        application["user_name"] = application.get("user_name", "Unknown User")
+        application["user_left_server"] = True
 
     # Format questions and answers for template
     questions_text = application.get("questions", [])
