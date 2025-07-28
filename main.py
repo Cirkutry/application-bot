@@ -1,3 +1,5 @@
+__version__ = "1.0.0"
+
 import asyncio
 import json
 import logging
@@ -26,7 +28,7 @@ print("""
             ███████║██║  ██║██████╔╝
             ╚══════╝╚═╝  ╚═╝╚═════╝ 
 """)
-print(f"Simple Applications Bot by Kre0lidge - Starting up...\n{RESET}")
+print(f"Simple Applications Bot v{__version__} by Kre0lidge - Starting up...\n{RESET}")
 
 # Get logger
 logger = logging.getLogger(__name__)
