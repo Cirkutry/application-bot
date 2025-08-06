@@ -286,6 +286,31 @@ class StaffApplicationSelect(Select):
                 await self.refresh_select_menu(interaction)
                 return
 
+            # Check role-based access control
+            user_roles = [str(role.id) for role in interaction.user.roles]
+            
+            # Check if user has any restricted roles (users with these roles cannot apply)
+            restricted_roles = position_settings.get("restricted_roles", [])
+            if restricted_roles and any(role_id in user_roles for role_id in restricted_roles):
+                await interaction.response.send_message(
+                    "You do not have permission to apply for this position.",
+                    ephemeral=True,
+                )
+                # Refresh the select menu for other users
+                await self.refresh_select_menu(interaction)
+                return
+            
+            # Check if user has required roles (if any are specified)
+            required_roles = position_settings.get("required_roles", [])
+            if required_roles and not any(role_id in user_roles for role_id in required_roles):
+                await interaction.response.send_message(
+                    "You do not have the required roles to apply for this position.",
+                    ephemeral=True,
+                )
+                # Refresh the select menu for other users
+                await self.refresh_select_menu(interaction)
+                return
+
             # Check if user already has an active application
             if hasattr(self.view.bot, "active_applications"):
                 active_app = self.view.bot.active_applications.get(
@@ -321,6 +346,31 @@ class StaffApplicationSelect(Select):
                                         pass  # Ignore if message doesn't exist or can't be deleted
                                 except Exception:
                                     pass  # Ignore if DM channel can't be created
+
+                            # Re-check role-based access control for the new application
+                            user_roles = [str(role.id) for role in interaction.user.roles]
+                            
+                            # Check if user has any restricted roles (users with these roles cannot apply)
+                            restricted_roles = position_settings.get("restricted_roles", [])
+                            if restricted_roles and any(role_id in user_roles for role_id in restricted_roles):
+                                await interaction.followup.send(
+                                    "You do not have permission to apply for this position.",
+                                    ephemeral=True,
+                                )
+                                # Refresh the select menu for other users
+                                await self.refresh_select_menu(interaction)
+                                return
+                            
+                            # Check if user has required roles (if any are specified)
+                            required_roles = position_settings.get("required_roles", [])
+                            if required_roles and not any(role_id in user_roles for role_id in required_roles):
+                                await interaction.followup.send(
+                                    "You do not have the required roles to apply for this position.",
+                                    ephemeral=True,
+                                )
+                                # Refresh the select menu for other users
+                                await self.refresh_select_menu(interaction)
+                                return
 
                             # Get questions for the position
                             questions = get_questions(position)
