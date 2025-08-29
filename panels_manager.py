@@ -6,6 +6,7 @@ import traceback
 import uuid
 import discord
 from dotenv import load_dotenv
+
 logger = logging.getLogger(__name__)
 load_dotenv()
 pathlib.Path("storage").mkdir(exist_ok=True)
@@ -14,6 +15,8 @@ pathlib.Path(APPS_DIRECTORY).mkdir(exist_ok=True)
 PANELS_DIRECTORY = "storage"
 pathlib.Path(PANELS_DIRECTORY).mkdir(exist_ok=True)
 PANELS_FILE = os.path.join(PANELS_DIRECTORY, "panels.json")
+
+
 def load_panels():
     if not os.path.exists(PANELS_FILE):
         return {}
@@ -23,6 +26,8 @@ def load_panels():
     except Exception as e:
         logger.error(f"Error loading panels: {str(e)}")
         return {}
+
+
 def save_panels(panels):
     try:
         with open(PANELS_FILE, "w") as f:
@@ -31,8 +36,11 @@ def save_panels(panels):
     except Exception as e:
         logger.error(f"Error saving panels: {str(e)}")
         return False
+
+
 async def register_panels(bot):
     from application_components import StaffApplicationView
+
     panels = load_panels()
     if hasattr(bot, "views"):
         bot.views.clear()
@@ -60,9 +68,7 @@ async def register_panels(bot):
             ]
             view = StaffApplicationView(bot, select_options, panel_id)
             bot.views[panel_id] = view
-            bot.views[str(message.id)] = (
-                view
-            )
+            bot.views[str(message.id)] = view
             bot.add_view(view, message_id=message.id)
             registered_count += 1
         except Exception as e:
@@ -70,8 +76,11 @@ async def register_panels(bot):
             logger.error(f"Error traceback: {traceback.format_exc()}")
             continue
     return registered_count
+
+
 async def create_panel(bot, channel_id, positions, embed_data):
     from application_components import StaffApplicationView
+
     try:
         embed = discord.Embed(
             title=embed_data.get("title", "Staff Applications"),

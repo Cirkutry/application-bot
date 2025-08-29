@@ -3,10 +3,13 @@ import logging
 import os
 import pathlib
 from dotenv import load_dotenv
+
 logger = logging.getLogger(__name__)
 load_dotenv()
 pathlib.Path("storage").mkdir(exist_ok=True)
 QUESTIONS_FILE = "storage/questions.json"
+
+
 def load_questions():
     if not os.path.exists(QUESTIONS_FILE):
         return {}
@@ -34,6 +37,8 @@ def load_questions():
             save_questions(new_data)
             return new_data
         return data
+
+
 def save_questions(questions):
     try:
         os.makedirs(os.path.dirname(QUESTIONS_FILE), exist_ok=True)
@@ -43,6 +48,8 @@ def save_questions(questions):
     except Exception as e:
         logger.error(f"Error saving questions: {str(e)}")
         return False
+
+
 def get_questions(position):
     try:
         questions = load_questions()
@@ -63,8 +70,11 @@ def get_questions(position):
     except Exception as e:
         logger.error(f"Error getting questions for position {position}: {e}")
         import traceback
+
         logger.error(traceback.format_exc())
         return []
+
+
 def add_position(position, copy_from=None):
     questions = load_questions()
     if position in questions:
@@ -98,36 +108,48 @@ def add_position(position, copy_from=None):
             "time_limit": 60,
         }
     return save_questions(questions)
+
+
 def delete_position(position):
     questions = load_questions()
     if position in questions:
         del questions[position]
         return save_questions(questions)
     return False
+
+
 def update_position_settings(position, settings):
     questions = load_questions()
     if position in questions:
         questions[position].update(settings)
         return save_questions(questions)
     return False
+
+
 def add_question_to_position(position, question):
     questions = load_questions()
     if position in questions:
         questions[position]["questions"].append(question)
         return save_questions(questions)
     return False
+
+
 def remove_question(position, index):
     questions = load_questions()
     if position in questions and 0 <= index < len(questions[position]["questions"]):
         questions[position]["questions"].pop(index)
         return save_questions(questions)
     return False
+
+
 def update_question(position, index, new_question):
     questions = load_questions()
     if position in questions and 0 <= index < len(questions[position]["questions"]):
         questions[position]["questions"][index] = new_question
         return save_questions(questions)
     return False
+
+
 def reorder_questions(position, new_order):
     questions = load_questions()
     if position in questions and len(new_order) == len(

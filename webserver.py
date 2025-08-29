@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from application_components import StaffApplicationView
 from panels_manager import load_panels, save_panels
 from question_manager import load_questions, save_questions
+
 load_dotenv()
 WEB_HOST = os.getenv("WEB_HOST", "localhost")
 WEB_PORT = int(os.getenv("WEB_PORT") or 8080)
@@ -34,6 +35,8 @@ oauth_states = {}
 sessions = {}
 PANELS_DIRECTORY = "storage"
 pathlib.Path(PANELS_DIRECTORY).mkdir(exist_ok=True)
+
+
 def setup_jinja2(app):
     aiohttp_jinja2.setup(
         app,
@@ -41,6 +44,8 @@ def setup_jinja2(app):
         context_processors=[aiohttp_jinja2.request_processor],
         filters={"json": json.dumps},
     )
+
+
 class SimpleAccessFormatter(logging.Formatter):
     def format(self, record):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S,%f")[:-3]
@@ -51,7 +56,11 @@ class SimpleAccessFormatter(logging.Formatter):
             status_size = parts[2].strip()
             return f"{timestamp} - {ip} {request} {status_size}"
         return f"{timestamp} - {record.getMessage()}"
+
+
 access_log_format = SimpleAccessFormatter()
+
+
 def auth_required(handler):
     async def wrapper(request):
         session_id = request.cookies.get("session_id")
@@ -70,7 +79,10 @@ def auth_required(handler):
             "is_admin": is_admin,
         }
         return await handler(request)
+
     return wrapper
+
+
 @web.middleware
 async def auth_middleware(request, handler):
     if request.path in [
@@ -107,6 +119,8 @@ async def auth_middleware(request, handler):
     if not is_admin and request.path in admin_routes:
         return await handle_403(request, "admin_required")
     return await handler(request)
+
+
 @web.middleware
 async def error_middleware(request, handler):
     try:
@@ -115,6 +129,8 @@ async def error_middleware(request, handler):
         return await handle_404(request)
     except Exception:
         return await handler(request)
+
+
 async def handle_404(request):
     server_info = await get_server_info()
     user_info = {}
@@ -129,6 +145,8 @@ async def handle_404(request):
             "server": server_info,
         },
     )
+
+
 async def handle_403(request, context="general"):
     server_info = await get_server_info()
     user_info = {"name": "Guest", "avatar": None, "id": None}
@@ -160,11 +178,15 @@ async def handle_403(request, context="general"):
             "context": context,
         },
     )
+
+
 async def get_session(request):
     session_id = request.cookies.get("session_id")
     if not session_id or session_id not in sessions:
         raise web.HTTPUnauthorized(text="Invalid session")
     return sessions[session_id]
+
+
 async def get_user_info(user_id):
     server = bot.get_guild(int(SERVER_ID))
     if not server:
@@ -179,6 +201,8 @@ async def get_user_info(user_id):
         "roles": [str(role.id) for role in member.roles],
         "is_admin": member.guild_permissions.administrator,
     }
+
+
 def has_position_viewer_access(member, position_data):
     if not member:
         return False
@@ -187,6 +211,8 @@ def has_position_viewer_access(member, position_data):
     viewer_roles = position_data.get("viewer_roles", [])
     member_role_ids = [str(role.id) for role in member.roles]
     return any(role_id in member_role_ids for role_id in viewer_roles)
+
+
 def get_accessible_positions(member, all_positions):
     if not member:
         return {}
@@ -197,6 +223,8 @@ def get_accessible_positions(member, all_positions):
         if has_position_viewer_access(member, data):
             accessible_positions[position] = data
     return accessible_positions
+
+
 async def get_application_stats():
     try:
         applications = []
@@ -224,6 +252,8 @@ async def get_application_stats():
         }
     except Exception:
         return {"total": 0, "pending": 0, "approved": 0, "rejected": 0}
+
+
 async def load_applications():
     applications = []
     for filename in os.listdir(APPS_DIRECTORY):
@@ -235,7 +265,11 @@ async def load_applications():
                     app["status"] = "pending"
                 applications.append(app)
     return applications
+
+
 routes = web.RouteTableDef()
+
+
 @routes.get("/auth/login")
 async def auth_login(request):
     state = secrets.token_urlsafe(16)
@@ -250,6 +284,8 @@ async def auth_login(request):
     }
     oauth_url = f"{API_ENDPOINT}/oauth2/authorize?{urllib.parse.urlencode(params)}"
     return web.HTTPFound(oauth_url)
+
+
 @routes.get("/auth/callback")
 async def auth_callback(request):
     code = request.query.get("code")
@@ -301,6 +337,8 @@ async def auth_callback(request):
                     "session_id", session_id, httponly=True, max_age=86400
                 )
                 return response
+
+
 @routes.get("/auth/logout")
 async def auth_logout(request):
     session_id = request.cookies.get("session_id")
@@ -309,6 +347,8 @@ async def auth_logout(request):
     response = web.HTTPFound("/auth/login")
     response.del_cookie("session_id")
     return response
+
+
 async def get_server_info():
     server = bot.get_guild(int(SERVER_ID))
     if server:
@@ -318,6 +358,8 @@ async def get_server_info():
             "member_count": server.member_count,
         }
     return None
+
+
 @routes.get("/")
 @auth_required
 async def index(request):
@@ -347,6 +389,8 @@ async def index(request):
             "is_admin": request["user_permissions"]["is_admin"],
         },
     )
+
+
 @routes.get("/applications")
 @auth_required
 async def applications(request):
@@ -447,6 +491,8 @@ async def applications(request):
     if sort:
         context["sort"] = sort
     return aiohttp_jinja2.render_template("applications.html", request, context)
+
+
 @routes.get("/positions")
 @auth_required
 async def questions(request):
@@ -477,6 +523,8 @@ async def questions(request):
             "server": server,
         },
     )
+
+
 @routes.get("/application/{id}")
 @auth_required
 async def application(request):
@@ -551,6 +599,8 @@ async def application(request):
             "is_admin": is_admin,
         },
     )
+
+
 @routes.delete("/api/applications/{app_id}")
 async def delete_application(request):
     app_id = request.match_info["app_id"]
@@ -562,6 +612,8 @@ async def delete_application(request):
         return web.json_response({"message": "Application deleted successfully"})
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)
+
+
 @routes.post("/api/questions/position/add")
 async def add_position(request):
     try:
@@ -592,6 +644,8 @@ async def add_position(request):
         return web.Response(text="Position added successfully")
     except Exception as e:
         return web.Response(text=str(e), status=500)
+
+
 @routes.post("/api/questions/position/delete")
 async def delete_position(request):
     try:
@@ -608,6 +662,8 @@ async def delete_position(request):
             return web.Response(text="Position not found", status=404)
     except Exception as e:
         return web.Response(text=str(e), status=500)
+
+
 @routes.post("/api/questions/add")
 async def add_question(request):
     try:
@@ -625,6 +681,8 @@ async def add_question(request):
             return web.Response(text="Position not found", status=404)
     except Exception as e:
         return web.Response(text=str(e), status=500)
+
+
 @routes.post("/api/questions/remove")
 async def remove_question(request):
     try:
@@ -642,6 +700,8 @@ async def remove_question(request):
             return web.Response(text="Position or index not found", status=404)
     except Exception as e:
         return web.Response(text=str(e), status=500)
+
+
 @routes.post("/api/questions/update")
 async def update_question(request):
     try:
@@ -662,6 +722,8 @@ async def update_question(request):
             return web.Response(text="Position or index not found", status=404)
     except Exception as e:
         return web.Response(text=str(e), status=500)
+
+
 @routes.get("/panel-creator")
 @auth_required
 async def panel_creator(request):
@@ -680,6 +742,8 @@ async def panel_creator(request):
             "server": server,
         },
     )
+
+
 @routes.post("/api/panels/create")
 async def create_panel(request):
     try:
@@ -743,6 +807,8 @@ async def create_panel(request):
         return web.Response(text="Panel created successfully")
     except Exception as e:
         return web.Response(text=str(e), status=500)
+
+
 @routes.post("/api/applications/{app_id}/status")
 @auth_required
 async def update_application_status(request):
@@ -776,6 +842,8 @@ async def update_application_status(request):
         return web.json_response({"success": True})
     except Exception as e:
         return web.json_response({"success": False, "error": str(e)}, status=500)
+
+
 @routes.post("/api/questions/position/update")
 @auth_required
 async def update_position(request):
@@ -840,6 +908,8 @@ async def update_position(request):
         return web.Response(text="Position updated successfully")
     except Exception as e:
         return web.Response(text=str(e), status=500)
+
+
 @routes.get("/positions/edit/{position}")
 @auth_required
 async def edit_position(request):
@@ -874,6 +944,8 @@ async def edit_position(request):
             "server": server,
         },
     )
+
+
 @routes.get("/api/validate_channel/{channel_id}")
 @auth_required
 async def validate_channel(request):
@@ -887,6 +959,8 @@ async def validate_channel(request):
         return web.Response(status=400, text="Invalid channel ID format")
     except Exception as e:
         return web.Response(status=500, text=f"Error: {str(e)}")
+
+
 async def start_web_server(bot_instance):
     global bot
     bot = bot_instance
@@ -908,8 +982,11 @@ async def start_web_server(bot_instance):
     site = web.TCPSite(runner, WEB_HOST, WEB_PORT)
     await site.start()
     return runner, site
+
+
 if __name__ == "__main__":
     import asyncio
+
     loop = asyncio.get_event_loop()
     runner, site = loop.run_until_complete(start_web_server(bot))
     try:

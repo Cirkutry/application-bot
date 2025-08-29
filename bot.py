@@ -17,11 +17,14 @@ from application_components import (
     load_active_applications,
 )
 from question_manager import load_questions
+
 logger = logging.getLogger(__name__)
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 APPS_DIRECTORY = "storage/applications"
 pathlib.Path(APPS_DIRECTORY).mkdir(exist_ok=True)
+
+
 class ApplicationBot(discord.Client):
     def __init__(self):
         intents = discord.Intents.default()
@@ -31,11 +34,10 @@ class ApplicationBot(discord.Client):
         self.tree = discord.app_commands.CommandTree(self)
         self.active_applications = load_active_applications()
         self.views = {}
+
     async def setup_hook(self):
         for user_id, app_data in self.active_applications.items():
-            if (
-                "start_time" not in app_data
-            ):
+            if "start_time" not in app_data:
                 try:
                     logger.info(f"Attempting to restore view for user {user_id}")
                     view = await ApplicationStartView.restore_view(self, app_data)
@@ -48,6 +50,7 @@ class ApplicationBot(discord.Client):
         self.add_view(ApplicationResponseView("", ""))
         self.add_listener(handle_dm_message, "on_message")
         from panels_manager import register_panels
+
         try:
             await register_panels(self)
             logger.info("Successfully registered saved panels")
@@ -60,9 +63,11 @@ class ApplicationBot(discord.Client):
         except Exception as e:
             logger.error(f"Error syncing commands: {e}")
             logger.error(f"Error traceback: {traceback.format_exc()}")
+
     async def on_ready(self):
         logger.info(f"Logged in as {self.user.name} ({self.user.id})")
         await self.tree.sync()
+
     async def on_message(self, message):
         if message.author == self.user:
             return
@@ -132,6 +137,7 @@ class ApplicationBot(discord.Client):
                 logger.info(f"Finished processing message from {message.author.name}")
             return
         await self.process_commands(message)
+
     async def _complete_application(self, message, app_data):
         logger.info("All questions answered, preparing submission")
         qa_pairs = []
@@ -207,7 +213,11 @@ class ApplicationBot(discord.Client):
         logger.info(
             f"Application for {message.author.name} submitted and removed from active applications"
         )
+
+
 bot = ApplicationBot()
+
+
 @bot.tree.command(
     name="setup_applications", description="Set up the staff application system"
 )
@@ -222,6 +232,8 @@ async def setup_applications(interaction: discord.Interaction):
     view = StaffApplicationView(bot)
     bot.add_view(view)
     await interaction.response.send_message(embed=embed, view=view)
+
+
 @bot.tree.command(
     name="panel_create",
     description="Create a new application panel through the dashboard",
@@ -236,5 +248,7 @@ async def panel_create(interaction: discord.Interaction):
         f"Please use the web dashboard to create and manage panels. Visit the dashboard at {web_url}",
         ephemeral=True,
     )
+
+
 if __name__ == "__main__":
     bot.run(TOKEN)

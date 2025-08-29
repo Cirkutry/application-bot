@@ -11,12 +11,15 @@ from discord.ui import Button, Item, Modal, Select, TextInput, View
 from dotenv import load_dotenv
 from panels_manager import load_panels
 from question_manager import get_questions, load_questions
+
 logger = logging.getLogger(__name__)
 load_dotenv()
 pathlib.Path("storage").mkdir(exist_ok=True)
 APPS_DIRECTORY = "storage/applications"
 pathlib.Path(APPS_DIRECTORY).mkdir(exist_ok=True)
 ACTIVE_APPS_FILE = os.path.join("storage", "active_applications.json")
+
+
 async def get_dm_link(bot, user):
     try:
         dm_channel = await user.create_dm()
@@ -25,6 +28,8 @@ async def get_dm_link(bot, user):
     except Exception as e:
         logger.error(f"Error creating DM link: {e}")
     return "https://discord.com/app"
+
+
 def load_active_applications():
     if not os.path.exists(ACTIVE_APPS_FILE):
         return {}
@@ -34,6 +39,8 @@ def load_active_applications():
     except Exception as e:
         logger.error(f"Error loading active applications: {str(e)}")
         return {}
+
+
 def save_active_applications(applications):
     try:
         if not os.path.exists(APPS_DIRECTORY):
@@ -44,6 +51,8 @@ def save_active_applications(applications):
     except Exception as e:
         logger.error(f"Error saving active applications: {str(e)}")
         return False
+
+
 async def handle_dm_message(bot, message):
     if not isinstance(message.channel, discord.DMChannel):
         return
@@ -59,14 +68,10 @@ async def handle_dm_message(bot, message):
     if "start_time" in application:
         start_time = datetime.datetime.fromisoformat(application["start_time"])
         current_time = datetime.datetime.now(UTC)
-        time_elapsed = (
-            current_time - start_time
-        ).total_seconds() / 60
+        time_elapsed = (current_time - start_time).total_seconds() / 60
         questions = load_questions()
         position_settings = questions.get(application["position"], {})
-        time_limit = position_settings.get(
-            "time_limit", 60
-        )
+        time_limit = position_settings.get("time_limit", 60)
         if time_elapsed > time_limit:
             await message.channel.send(
                 f"⌛ Your application has expired. You had {time_limit} minutes to complete it. Please start a new application if you wish to apply."
@@ -167,6 +172,8 @@ async def handle_dm_message(bot, message):
                             logger.error(f"Error creating thread: {e}")
             except Exception as e:
                 logger.error(f"Error logging application: {e}")
+
+
 class StaffApplicationSelect(Select):
     def __init__(self, bot, options, panel_id=None):
         self.bot = bot
@@ -179,6 +186,7 @@ class StaffApplicationSelect(Select):
             min_values=1,
             max_values=1,
         )
+
     async def callback(self, interaction: discord.Interaction):
         try:
             position = self.values[0]
@@ -472,6 +480,7 @@ class StaffApplicationSelect(Select):
                     await self.refresh_select_menu(interaction)
                 except Exception:
                     pass
+
     async def refresh_select_menu(self, interaction: discord.Interaction):
         try:
             panels = load_panels()
@@ -482,6 +491,8 @@ class StaffApplicationSelect(Select):
         except Exception as e:
             logger.error(f"Error refreshing select menu: {e}")
             logger.error(f"Error traceback: {traceback.format_exc()}")
+
+
 class StaffApplicationView(View):
     def __init__(self, bot, options=None, panel_id=None):
         super().__init__(timeout=None)
@@ -508,12 +519,14 @@ class StaffApplicationView(View):
                 ]
                 select = StaffApplicationSelect(bot, select_options, self.panel_id)
                 self.add_item(select)
+
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         try:
             return True
         except Exception as e:
             logger.error(f"Error in interaction check: {e}")
             return False
+
     async def on_error(
         self, error: Exception, item: Item, interaction: discord.Interaction
     ) -> None:
@@ -522,6 +535,8 @@ class StaffApplicationView(View):
             "An error occurred while processing your request. Please try again later.",
             ephemeral=True,
         )
+
+
 class ReasonModal(Modal):
     def __init__(self, action: str, application_id: str):
         super().__init__(title=f"{action.capitalize()} Application")
@@ -534,6 +549,7 @@ class ReasonModal(Modal):
             required=True,
         )
         self.add_item(self.reason)
+
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         app_path = os.path.join(APPS_DIRECTORY, f"{self.application_id}.json")
@@ -749,6 +765,8 @@ class ReasonModal(Modal):
                 f"Application {self.action}ed with reason, but could not send DM to the applicant: {dm_error}",
                 ephemeral=True,
             )
+
+
 class ApplicationResponseButton(Button):
     def __init__(self, action: str, application_id: str, with_reason: bool = False):
         super().__init__(
@@ -761,6 +779,7 @@ class ApplicationResponseButton(Button):
         self.action = action
         self.application_id = application_id
         self.with_reason = with_reason
+
     async def callback(self, interaction: discord.Interaction):
         if self.with_reason:
             modal = ReasonModal(self.action, self.application_id)
@@ -933,6 +952,8 @@ class ApplicationResponseButton(Button):
                     f"Application {self.action}ed, but could not send DM to the applicant: {dm_error}",
                     ephemeral=True,
                 )
+
+
 class ApplicationResponseView(View):
     def __init__(self, application_id: str, position: str):
         super().__init__(timeout=None)
@@ -947,10 +968,12 @@ class ApplicationResponseView(View):
             ApplicationResponseButton("reject", application_id, with_reason=True)
         )
         self.bot = None
+
     def set_bot(self, bot):
         self.bot = bot
         bot.add_view(self)
         return self
+
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         questions = load_questions()
         position_settings = questions.get(self.position, {})
@@ -986,6 +1009,7 @@ class ApplicationResponseView(View):
             ephemeral=True,
         )
         return False
+
     async def on_error(
         self, error: Exception, item: Item, interaction: discord.Interaction
     ) -> None:
@@ -994,6 +1018,8 @@ class ApplicationResponseView(View):
             "An error occurred while processing your request. Please try again later.",
             ephemeral=True,
         )
+
+
 class ApplicationStartButton(Button):
     def __init__(self, action: str, user_id: str, position: str):
         custom_id = f"app_welcome_{action}_{user_id}_{position}"
@@ -1010,6 +1036,7 @@ class ApplicationStartButton(Button):
         self.action = action
         self.user_id = user_id
         self.position = position
+
     async def callback(self, interaction: discord.Interaction):
         app_data = self.view.application_data
         if self.action == "start":
@@ -1017,9 +1044,7 @@ class ApplicationStartButton(Button):
             questions = load_questions()
             position = app_data.get("position", "")
             position_settings = questions.get(position, {})
-            time_limit = position_settings.get(
-                "time_limit", 60
-            )
+            time_limit = position_settings.get("time_limit", 60)
             if (
                 hasattr(self.view.bot, "active_applications")
                 and str(interaction.user.id) in self.view.bot.active_applications
@@ -1056,6 +1081,8 @@ class ApplicationStartButton(Button):
             original_embed.set_footer(text="Application has been cancelled.")
             await interaction.message.edit(embed=original_embed, view=None)
         self.view.stop()
+
+
 class ApplicationStartView(View):
     def __init__(self, bot, application_data):
         super().__init__(timeout=None)
@@ -1073,6 +1100,7 @@ class ApplicationStartView(View):
             )
         )
         bot.add_view(self)
+
     async def on_timeout(self):
         user_id = int(self.application_data["user_id"])
         user = self.bot.get_user(user_id)
@@ -1090,6 +1118,7 @@ class ApplicationStartView(View):
                     save_active_applications(self.bot.active_applications)
         except Exception as e:
             logger.error(f"Error sending expiration message: {e}")
+
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         user_id = str(interaction.user.id)
         app_user_id = self.application_data.get("user_id", "")
@@ -1102,6 +1131,7 @@ class ApplicationStartView(View):
             )
             return False
         return True
+
     @classmethod
     async def restore_view(cls, bot, application_data):
         view = cls(bot, application_data)

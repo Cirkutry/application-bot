@@ -11,6 +11,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from webserver import start_web_server
+
 COLOR = "\033[38;2;243;221;182m"
 RESET = "\033[0m"
 print(f"{COLOR}")
@@ -24,6 +25,8 @@ print("""
 """)
 print(f"Simple Applications Bot v{__version__} by Kre0lidge - Starting up...\n{RESET}")
 logger = logging.getLogger(__name__)
+
+
 def ensure_directories():
     directories = ["storage", "storage/applications", "storage/logs"]
     for directory in directories:
@@ -34,6 +37,8 @@ def ensure_directories():
             with open(file_path, "w") as f:
                 f.write(default_content)
             logger.info(f"Created default file: {file_path}")
+
+
 ensure_directories()
 logging.basicConfig(
     level=logging.INFO,
@@ -72,6 +77,8 @@ web_runner = None
 web_site = None
 shutdown_event = asyncio.Event()
 shutdown_lock = asyncio.Lock()
+
+
 async def shutdown():
     async with shutdown_lock:
         if shutdown_event.is_set():
@@ -86,9 +93,13 @@ async def shutdown():
             await bot.close()
         logging.info("Shutdown complete")
         os._exit(0)
+
+
 def signal_handler(signum, frame):
     logging.info(f"Received signal {signum}, initiating shutdown...")
     asyncio.create_task(shutdown())
+
+
 async def handle_exception(loop, context):
     exception = context.get("exception")
     if exception:
@@ -98,6 +109,8 @@ async def handle_exception(loop, context):
     if not shutdown_event.is_set():
         logging.info("Initiating shutdown due to exception...")
         await shutdown()
+
+
 async def main():
     global bot, web_runner, web_site
     for sig in (signal.SIGINT, signal.SIGTERM):
@@ -106,6 +119,7 @@ async def main():
     intents.message_content = True
     intents.members = True
     bot = commands.Bot(command_prefix="!", intents=intents)
+
     @bot.listen("on_interaction")
     async def handle_global_app_buttons(interaction):
         try:
@@ -122,19 +136,19 @@ async def main():
                     "_".join(parts[4:])
                     if not hasattr(bot, "active_applications"):
                         from application_components import load_active_applications
+
                         bot.active_applications = load_active_applications()
                     if user_id in bot.active_applications:
                         from application_components import (
                             ApplicationStartButton,
                             ApplicationStartView,
                         )
+
                         view = ApplicationStartView(
                             bot, bot.active_applications[user_id]
                         )
                         if action == "start" and len(view.children) > 0:
-                            start_button = view.children[
-                                0
-                            ]
+                            start_button = view.children[0]
                             if (
                                 isinstance(start_button, ApplicationStartButton)
                                 and start_button.action == "start"
@@ -146,9 +160,7 @@ async def main():
                                     ephemeral=True,
                                 )
                         elif action == "cancel" and len(view.children) > 1:
-                            cancel_button = view.children[
-                                1
-                            ]
+                            cancel_button = view.children[1]
                             if (
                                 isinstance(cancel_button, ApplicationStartButton)
                                 and cancel_button.action == "cancel"
@@ -180,24 +192,30 @@ async def main():
                     )
             except Exception:
                 pass
+
     @bot.event
     async def on_message(message):
         await bot.process_commands(message)
         if message.guild is None:
             from application_components import handle_dm_message
+
             await handle_dm_message(bot, message)
+
     @bot.event
     async def on_ready():
         server = bot.get_guild(int(SERVER_ID))
         server_name = server.name if server else "Unknown Server"
         from application_components import load_active_applications
+
         bot.active_applications = load_active_applications()
         logging.info(f"Loaded {len(bot.active_applications)} active applications")
         from panels_manager import register_panels
+
         panel_count = await register_panels(bot)
         logging.info(f"Registered {panel_count} application panels")
         try:
             from application_components import ApplicationResponseView
+
             count = 0
             apps_directory = "storage/applications"
             if os.path.exists(apps_directory):
@@ -221,6 +239,7 @@ async def main():
             dashboard_url = web_external
         logging.info(f"Dashboard is available at: {dashboard_url}")
         logging.info("Bot is now running!")
+
     loop = asyncio.get_running_loop()
     loop.set_exception_handler(handle_exception)
     web_runner, web_site = await start_web_server(bot)
@@ -247,6 +266,8 @@ async def main():
     finally:
         if not shutdown_event.is_set():
             await shutdown()
+
+
 if __name__ == "__main__":
     try:
         asyncio.run(main())
