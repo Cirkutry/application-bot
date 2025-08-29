@@ -2,27 +2,16 @@ import json
 import logging
 import os
 import pathlib
-
 from dotenv import load_dotenv
-
-# Get logger
 logger = logging.getLogger(__name__)
-
-# Load environment variables
 load_dotenv()
-
-# Ensure storage directory exists
 pathlib.Path("storage").mkdir(exist_ok=True)
 QUESTIONS_FILE = "storage/questions.json"
-
-
 def load_questions():
     if not os.path.exists(QUESTIONS_FILE):
         return {}
-
     with open(QUESTIONS_FILE, "r") as f:
         data = json.load(f)
-        # Convert old format to new format if needed
         if isinstance(data, dict) and all(isinstance(v, list) for v in data.values()):
             new_data = {}
             for position, questions in data.items():
@@ -45,21 +34,15 @@ def load_questions():
             save_questions(new_data)
             return new_data
         return data
-
-
 def save_questions(questions):
     try:
-        # Ensure directory exists
         os.makedirs(os.path.dirname(QUESTIONS_FILE), exist_ok=True)
-
         with open(QUESTIONS_FILE, "w") as f:
             json.dump(questions, f, indent=4)
         return True
     except Exception as e:
         logger.error(f"Error saving questions: {str(e)}")
         return False
-
-
 def get_questions(position):
     try:
         questions = load_questions()
@@ -67,15 +50,12 @@ def get_questions(position):
             if not questions[position]["enabled"]:
                 logger.info(f"Position {position} is disabled")
                 return []
-
             if "questions" not in questions[position]:
                 logger.info(f"No 'questions' field found for position {position}")
                 return []
-
             if not questions[position]["questions"]:
                 logger.info(f"Empty questions list for position {position}")
                 return []
-
             return questions[position]["questions"]
         else:
             logger.info(f"Position {position} not found in questions data")
@@ -83,22 +63,16 @@ def get_questions(position):
     except Exception as e:
         logger.error(f"Error getting questions for position {position}: {e}")
         import traceback
-
         logger.error(traceback.format_exc())
         return []
-
-
 def add_position(position, copy_from=None):
     questions = load_questions()
     if position in questions:
-        return False  # Position already exists
-
+        return False
     if copy_from and copy_from in questions:
-        # Copy all settings from the source position
         questions[position] = questions[copy_from].copy()
         questions[position]["questions"] = questions[copy_from]["questions"].copy()
     else:
-        # Create new position with default settings
         questions[position] = {
             "enabled": True,
             "questions": [],
@@ -123,50 +97,37 @@ def add_position(position, copy_from=None):
             "auto_thread": False,
             "time_limit": 60,
         }
-
     return save_questions(questions)
-
-
 def delete_position(position):
     questions = load_questions()
     if position in questions:
         del questions[position]
         return save_questions(questions)
     return False
-
-
 def update_position_settings(position, settings):
     questions = load_questions()
     if position in questions:
         questions[position].update(settings)
         return save_questions(questions)
     return False
-
-
 def add_question_to_position(position, question):
     questions = load_questions()
     if position in questions:
         questions[position]["questions"].append(question)
         return save_questions(questions)
     return False
-
-
 def remove_question(position, index):
     questions = load_questions()
     if position in questions and 0 <= index < len(questions[position]["questions"]):
         questions[position]["questions"].pop(index)
         return save_questions(questions)
     return False
-
-
 def update_question(position, index, new_question):
     questions = load_questions()
     if position in questions and 0 <= index < len(questions[position]["questions"]):
         questions[position]["questions"][index] = new_question
         return save_questions(questions)
     return False
-
-
 def reorder_questions(position, new_order):
     questions = load_questions()
     if position in questions and len(new_order) == len(
